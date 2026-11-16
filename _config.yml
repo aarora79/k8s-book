@@ -34,6 +34,7 @@ book_pages:
   - chapters/09-admission-webhook/README.md
   - chapters/10-tiny-gateway/README.md
   - chapters/11-capstone-mcp-gateway/README.md
+  - GLOSSARY.md
 
 # Files for contributors and agents, not readers.
 exclude:

@@ -57,3 +57,15 @@ article img {
   color: #828282;
   white-space: nowrap;
 }
+
+// "Everyday picture" blocks: plain, readable text on a light panel.
+blockquote {
+  margin: 0 0 15px 0;
+  padding: 10px 16px;
+  color: #24292f;
+  font-size: 16px;
+  font-style: normal;
+  letter-spacing: normal;
+  background: #f6f8fa;
+  border-left: 4px solid #2a7ae2;
+}

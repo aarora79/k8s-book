@@ -4,7 +4,7 @@ Learn Kubernetes by rebuilding its parts.
 
 Read it online at [aarora79.github.io/k8s-book](https://aarora79.github.io/k8s-book/).
 
-Each chapter builds one small, working piece of Kubernetes in Go, runs it against a real cluster on your laptop next to the real component, and then reads the real source to explain why Kubernetes does it differently. By the last chapter, a pod on your cluster was created by your controller, placed by your scheduler, run by your kubelet, reached through your Service rules and checked by your admission webhook.
+Each chapter builds one small, working piece of Kubernetes in Go, runs it on a cluster on your laptop next to the component it copies, and then reads the Kubernetes source to explain where the two differ. By the last chapter, your controller creates a pod, your scheduler places it, your kubelet runs it, your Service rules route traffic to it and your admission webhook checks it.
 
 The shape of the book comes from Herbert Schildt's *Born to Code in C* (Osborne/McGraw-Hill, 1989). Schildt did not teach C from the ground up. He assumed you knew the basics and spent each chapter building one complete, useful program: a C interpreter, a text editor, a multitasking kernel. You learned the language by building real things in it. This repo does the same for Kubernetes.
 
@@ -12,14 +12,14 @@ The shape of the book comes from Herbert Schildt's *Born to Code in C* (Osborne/
 
 You have used Kubernetes a little: you can apply a manifest and read `kubectl get pods`. You can read Go, or you are willing to learn it as you go. You want to know what happens between `kubectl apply` and a running process, and you learn best by building.
 
-If you have never run a container, start with the [archived 13-phase course](archive/README.md), which goes from zero to a working cluster.
+If you have never run a container, start with the [archived 13-phase course](https://github.com/aarora79/k8s-100-to-mcp-gateway), which goes from zero to a working cluster.
 
 ## Chapters
 
 | # | Chapter | You build | Status |
 | --- | --- | --- | --- |
 | 0 | [The map and the lab](chapters/00-map-and-lab/README.md) | A kind cluster pinned to Kubernetes 1.34 and a `make check` that proves it works | Written |
-| 1 | [A container by hand](chapters/01-container-by-hand/README.md) | A container runtime in about 150 lines of Go: namespaces, chroot, cgroups | Written |
+| 1 | [A container by hand](chapters/01-container-by-hand/README.md) | A container runtime in about 200 lines of Go: namespaces, chroot, cgroups | Written |
 | 2 | [Talk to the API server with curl](chapters/02-api-server-with-curl/README.md) | Create, watch, patch and delete pods with nothing but curl | Written |
 | 3 | [A mini kubectl and an informer](chapters/03-mini-kubectl-and-informer/README.md) | `kk get`, `kk apply`, `kk watch` and a hand-built informer, standard library only | Planned |
 | 4 | [A ReplicaSet controller](chapters/04-replicaset-controller/README.md) | The reconcile loop | Planned |
@@ -32,6 +32,8 @@ If you have never run a container, start with the [archived 13-phase course](arc
 | 11 | [Capstone: MCP Gateway Registry](chapters/11-capstone-mcp-gateway/README.md) | MCP Gateway Registry running on your parts, then the swap test | Planned |
 
 Chapters 1 to 6 build a pod pipeline from your own parts. Chapters 7 to 10 add what a real application needs. Chapter 11 runs a real application on all of it.
+
+The [glossary](GLOSSARY.md) at the end defines every term the book uses, each with an everyday example.
 
 ## How each chapter works
 
@@ -49,7 +51,7 @@ Step 1 is always the smallest version that runs end to end. Each later step adds
 
 ## Requirements
 
-- A Mac with Apple Silicon (the book is written and tested for it), or Linux. Windows works through WSL2.
+- A Mac with Apple Silicon (the book's main target), or Linux. Windows works through WSL2.
 - A Docker runtime: Docker Desktop, OrbStack or Colima.
 - Go 1.24 or later, kind 0.30.0, kubectl, curl and jq.
 
@@ -72,8 +74,8 @@ See [STYLE.md](STYLE.md) for the writing and code rules.
 
 ## Archive
 
-The earlier course, *Kubernetes from 100 to MCP Gateway*, lives in [archive/](archive/). It has 13 hands-on phases and two capstones: MCP Gateway Registry, and Gemma served with Prometheus and Grafana. Git history for those files is intact.
+The earlier course, *Kubernetes from 100 to MCP Gateway*, lives in its own repo, [k8s-100-to-mcp-gateway](https://github.com/aarora79/k8s-100-to-mcp-gateway). It has 13 hands-on phases and two capstones: MCP Gateway Registry, and Gemma served with Prometheus and Grafana.
 
 ## License
 
-The book text and code are licensed under the [Apache License 2.0](LICENSE).
+The [Apache License 2.0](LICENSE) covers the book text and code.

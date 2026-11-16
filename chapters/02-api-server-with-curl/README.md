@@ -19,9 +19,17 @@ Every program you write in later chapters talks to the API server in exactly the
 
 ## What the real one does
 
+> **Everyday picture.** At a bank you never walk into the vault. You hand a form through the teller's window, the teller checks it and does the work, and you get a receipt back. **In Kubernetes,** the API server is the window and kubectl is a customer. Each form is an HTTP request: a method that says what to do (`GET` to read, `POST` to create, `PATCH` or `PUT` to change, `DELETE` to remove) and a path that says which object.
+
 kubectl is an HTTP client. `kubectl get pods -n ch02` sends `GET /api/v1/namespaces/ch02/pods` and prints a table from the JSON that comes back. Add `-v=8` to any kubectl command and it prints each request and response.
 
-The API server checks who you are (authentication), whether you may do this (authorization), whether the object passes the admission plugins (chapter 9 adds your own), and then stores the object in etcd. It is the only component that talks to etcd. Every object it stores gets a `resourceVersion`, a token that changes on every write. Clients use it two ways: to watch for changes after a known point, and to refuse a write based on a stale read.
+> **Everyday picture.** At an airport, the passport desk checks who you are, the gate checks that your ticket lets you board this flight, and security checks what you carry. You need all three. **In Kubernetes,** the API server runs the same three gates on every request: authentication (who are you), authorization (may you do this), and admission (is this object acceptable).
+
+The API server checks who you are (authentication), whether you may do this (authorization), whether the object passes the admission plugins (chapter 9 adds your own), and then stores the object in etcd. It is the only component that talks to etcd.
+
+> **Everyday picture.** A shared online document numbers each save. If you edit from a copy you opened an hour ago, the editor warns you that someone saved since. **In Kubernetes,** that save number is the `resourceVersion`.
+
+Every object it stores gets a `resourceVersion`, a token that changes on every write. Clients use it two ways: to watch for changes after a known point, and to refuse a write based on a stale read.
 
 ## Scope
 
@@ -50,6 +58,8 @@ Every script reads `env.sh`, which sets `API=http://127.0.0.1:8001` and `NS=ch02
 ## Build it
 
 ### Step 1: look around
+
+> **Everyday picture.** The board in an office lobby lists which company sits on which floor, so a visitor finds the right door without asking around. **In Kubernetes,** the discovery endpoints are that board: they list which resources live under which URL.
 
 The API is a tree of plain URLs. `/api/v1` holds the core group (pods, services, namespaces, nodes). Everything newer lives under `/apis/<group>/<version>`, for example `/apis/apps/v1` for Deployments.
 
@@ -129,6 +139,8 @@ The patch moved `resourceVersion` from 424 to 425. Every write does. The delete 
 
 ### Step 3: watch
 
+> **Everyday picture.** You can walk to the newsstand each morning, or you can subscribe once and have each new issue delivered. A subscription starts from a given issue number. **In Kubernetes,** a list is the walk to the newsstand, a watch is the subscription, and the `resourceVersion` is the issue number it starts from.
+
 A watch is a `GET` with `watch=true` that the API server holds open, sending one JSON object per line each time something changes. Clients start a watch from the `resourceVersion` of a list, so they miss nothing between the list and the watch:
 
 ```bash
@@ -158,7 +170,11 @@ Your script made three writes, but the watch shows more. On the lab cluster the 
 
 ### Step 4: two writers, one conflict
 
-Two programs read an object, change it and write it back. Without a check, the second write would erase the first. Kubernetes uses optimistic concurrency: a full replace (`PUT`) carries the `resourceVersion` the writer read, and the API server rejects it if the object has changed since.
+Two programs read an object, change it and write it back. Without a check, the second write would erase the first.
+
+> **Everyday picture.** Two clerks copy the same paper form, each makes a change, and each hands theirs back. The office stamps every form with its revision number and rejects any copy whose stamp is out of date: "someone changed this, read the new one first". Nobody locks the form while they work. **In Kubernetes,** that is optimistic concurrency, and the stamp is the `resourceVersion`.
+
+Kubernetes uses optimistic concurrency: a full replace (`PUT`) carries the `resourceVersion` the writer read, and the API server rejects it if the object has changed since.
 
 The script uses a ConfigMap, because nothing else in the cluster writes to it:
 
@@ -190,6 +206,8 @@ The fix is always the same: read again, reapply your change, write again. Every 
 
 ### Step 5: a watch that is too old
 
+> **Everyday picture.** A newspaper keeps back issues for a few weeks. Ask for one from last year and the office tells you to start a fresh subscription. **In Kubernetes,** that answer is `410 Gone`.
+
 The API server keeps a window of recent changes in memory for watches. Ask for a starting point older than that window and it refuses:
 
 ```bash
@@ -204,11 +222,13 @@ fresh resourceVersion 438
 watch from http://127.0.0.1:8001/api/v1/namespaces/ch02/pods?watch=true&resourceVersion=438&timeoutSeconds=2 -> HTTP 200
 ```
 
-The HTTP status is 200; the refusal arrives as an `ERROR` event inside the stream. A client that has been disconnected for a while sees exactly this when it tries to resume. It must list again and rebuild its view of the world from the fresh list. The informer you build in chapter 3 does this.
+The HTTP status is 200; the refusal arrives as an `ERROR` event inside the stream. A client that loses its connection for a while sees exactly this when it tries to resume. It must list again and rebuild its copy of the objects from the fresh list. The informer you build in chapter 3 does this.
 
 ### Step 6: no proxy
 
-Inside the cluster nobody uses `kubectl proxy`. Components connect to the API server over TLS and present a credential. `step6/direct.sh` pulls the server address and its certificate authority from your kubeconfig, creates a service account bound to the read-only `view` role, and asks for a short-lived token:
+Inside the cluster nobody uses `kubectl proxy`. Components connect to the API server over TLS and present a credential.
+
+> **Everyday picture.** A visitor to an office gets a badge at the front desk. The badge names the visitor, expires at the end of the day and opens only some doors. **In Kubernetes,** a service account is an identity for a program, a token is its badge, and the role bound to the account decides which doors open. `step6/direct.sh` pulls the server address and its certificate authority from your kubeconfig, creates a service account bound to the read-only `view` role, and asks for a short-lived token:
 
 ```bash
 token=$(kubectl -n "$NS" create token reader --duration=10m)

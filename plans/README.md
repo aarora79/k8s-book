@@ -23,6 +23,7 @@ These files are work orders. Each one describes a chapter to finish: what to bui
 - Every code listing in the README is copied from a step folder. Every sample output in the README comes from a real run on the lab cluster, not from memory.
 - Each chapter has a `Makefile` with at least `test`, and a `test.sh` in the style of chapters 1 and 2: named checks that print `ok` or `FAIL` and exit non-zero on any failure. Add the chapter to `CHAPTERS` in the top-level `Makefile` when its tests pass.
 - Each chapter cleans up after its tests: its namespace, CRDs, webhooks, iptables chains and background processes.
+- Bridge every new term: the first time the chapter introduces a term, add an `**Everyday picture.**` quote block that maps a non-technical example to the technical meaning (see `STYLE.md` and chapters 0 to 2), and add the term to `GLOSSARY.md`.
 - Run `make stylecheck` before every commit.
 - Facts marked "verified" in a plan were checked on 2026-11-16 with sources. Facts marked "check" must be confirmed before they go into the chapter text, from kubernetes.io, the Kubernetes source at the pinned tag, or the project's own docs.
 - Update the chapter's row in the top-level README from `Planned` to `Written` when it merges.
@@ -36,4 +37,4 @@ These files are work orders. Each one describes a chapter to finish: what to bui
 
 - `make lab && make check && make test` passes from a fresh clone on an Apple Silicon Mac and in CI.
 - The chapter README reads top to bottom without gaps, every link resolves, and `make stylecheck` passes.
-- The chapter's "Run it beside the real one" and "Break it" sections were actually performed, and the README reports what happened.
+- You performed the chapter's "Run it beside the real one" and "Break it" sections, and the README reports what happened.

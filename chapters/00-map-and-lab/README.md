@@ -4,7 +4,7 @@ Written for Kubernetes 1.34.0, kind 0.30.0, Go 1.24.
 
 ## What you will build
 
-A three-node Kubernetes cluster on your laptop, pinned to the exact version every chapter is tested on, and a check that proves it works. On an Apple Silicon Mac, `make check` ends like this:
+A three-node Kubernetes cluster on your laptop, pinned to the exact version the book's tests use, and a check that proves it works. On an Apple Silicon Mac, `make check` ends like this:
 
 ```text
 Cluster
@@ -22,7 +22,11 @@ Before the lab, this chapter draws the map: the parts of Kubernetes, how they ta
 
 Kubernetes has one hub. The API server is the only component that reads and writes the cluster's database, etcd. Every other component, including kubectl, talks only to the API server. None of them call each other.
 
+> **Everyday picture.** In a restaurant kitchen, the waiter clips each order ticket to a rail above the counter. The cooks never talk to the waiter or to each other. Each cook reads the rail, takes the tickets for their station and marks them done, and the stack of tickets is the only record of what the kitchen owes. **In Kubernetes,** the API server is the rail, etcd is the stack of tickets it keeps, and each component is a cook that watches for its own kind of ticket.
+
 ![The map: kubectl sends requests to the API server; the API server alone talks to etcd and calls admission webhooks; controllers, scheduler, kubelet, kube-proxy and gateway all watch the API server.](images/map.svg)
+
+> **Everyday picture.** A thermostat holds a target temperature. It reads the room, compares it with the target and turns the heating on or off to close the gap. It does not care how the room got cold, and it keeps checking after the room is warm. **In Kubernetes,** an object's spec is the target (the desired state), what is running is the room (the actual state), and a program that closes the gap in a loop is a controller.
 
 Each component runs the same pattern. It watches the API server for objects it cares about, compares what the objects ask for with what exists, and acts to close the gap. It then writes what it did back to the API server, where the next component sees it.
 
@@ -91,6 +95,8 @@ lab-worker2         Ready    <none>          45s   v1.34.0
 
 ## Where your code runs
 
+> **Everyday picture.** A flight simulator gives a pilot a real cockpit, with real instruments and real controls, bolted to the floor instead of a plane. **In Kubernetes,** kind is the simulator: each node (one machine in the cluster) runs the real Kubernetes programs, but the machine under them is a Docker container on your laptop.
+
 kind runs each Kubernetes node as a Docker container. On a Mac, Docker itself runs inside a small Linux virtual machine, so the nodes are Linux containers inside a Linux VM inside macOS.
 
 ```bash
@@ -118,7 +124,11 @@ docker stop lab-worker2
 kubectl get nodes -w
 ```
 
-Within about a minute, `lab-worker2` turns `NotReady`. Nothing told the control plane the node died. The kubelet on each node renews a Lease object every few seconds, and the node lifecycle controller marks a node `NotReady` when its Lease goes stale. You will write that renewal yourself in chapter 6.
+Within about a minute, `lab-worker2` turns `NotReady`. Nothing told the control plane the node died.
+
+> **Everyday picture.** A night guard calls the front desk every hour to say all is well. If the desk hears nothing for two hours, it sends someone to look; it does not wait for the guard to report a problem. **In Kubernetes,** the call is a Lease: a small object that the kubelet (the agent on each node) updates on a timer, and the node lifecycle controller treats a Lease that stops changing as a dead node.
+
+The kubelet on each node renews a Lease object every few seconds, and the node lifecycle controller marks a node `NotReady` when its Lease goes stale. You will write that renewal yourself in chapter 6.
 
 ```bash
 docker start lab-worker2

@@ -8,7 +8,8 @@ A book that teaches Kubernetes by rebuilding its parts in Go, modeled on Herbert
 - `plans/`: work orders for unfinished chapters. Start at `plans/README.md`.
 - `lab/`: kind cluster config and `check.sh`.
 - `tools/stylecheck/`: enforces the prose rules below.
-- `archive/`: the earlier 13-phase course. Do not edit it.
+- The earlier 13-phase course lives in its own archived repo, https://github.com/aarora79/k8s-100-to-mcp-gateway.
+- `GLOSSARY.md`: every term the book defines. Add new terms there.
 
 ## Commands
 

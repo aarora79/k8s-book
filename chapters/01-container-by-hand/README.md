@@ -21,11 +21,15 @@ PID   USER     COMMAND
 /bin/sh: can't fork: Resource temporarily unavailable
 ```
 
+> **Everyday picture.** Guests in a hotel share one building, one water supply and one power line, but each room has its own number, its own key and its own circuit breaker, and no guest can see into the next room. Nobody builds a new hotel for each guest. **In Linux,** each container is a room: every container on a node shares the one Linux kernel, and the kernel gives each one its own view of the machine (namespaces) and its own limits (cgroups). This chapter builds both.
+
 A container is an ordinary Linux process that the kernel shows a restricted view of the machine. This chapter builds that view one piece at a time, and chapter 6 uses the result to run the pods your own kubelet receives.
 
 The design follows Liz Rice's talk [Containers From Scratch](https://gotopia.tech/sessions/380/containers-from-scratch) ([code](https://github.com/lizrice/containers-from-scratch)).
 
 ## What the real one does
+
+> **Everyday picture.** A wall socket follows a standard, so any lamp or kettle with the right plug works in any house. **In Kubernetes,** the Container Runtime Interface (CRI) is the socket between the kubelet and a container runtime such as containerd, and the Open Container Initiative (OCI) runtime spec is the socket between containerd and runc. Either side can be swapped for another that fits the same standard.
 
 When the kubelet starts a pod, it asks the container runtime (containerd on kind nodes) over the Container Runtime Interface. containerd unpacks the image into a filesystem and hands a directory plus a JSON config to an OCI runtime, usually [runc](https://github.com/opencontainers/runc). runc does the work this chapter does by hand: it creates namespaces, joins cgroups, mounts `/proc` and `/dev`, switches the root filesystem and executes the container's first process.
 
@@ -63,7 +67,11 @@ make shell
 
 ### Step 1: a new hostname
 
-The smallest container changes one thing: the hostname. A UTS namespace gives a process its own hostname, separate from the machine's.
+The smallest container changes one thing: the hostname.
+
+> **Everyday picture.** A hotel has one street address, but the number on your door belongs to your room alone, and changing it does not change the building's address. **In Linux,** a namespace is that door number: the kernel gives a process its own copy of one thing the machine normally shares. Linux has several kinds. A UTS namespace gives a process its own hostname, separate from the machine's.
+
+(Kubernetes also has namespaces, such as `ch02` in chapter 2. Those group API objects and have nothing to do with Linux namespaces.)
 
 The program starts itself twice. The first copy, `run`, asks the kernel to start the second copy, `child`, inside a new namespace. The child then sets the hostname and runs your command. The child has to exist because the namespace only applies to processes started inside it, and Go cannot run code between `fork` and `exec`.
 
@@ -93,7 +101,7 @@ func child(args []string) {
 }
 ```
 
-`/proc/self/exe` always points at the running program's own binary, so `run` can start a copy of itself without knowing where it was installed. `exitWith` passes the command's exit code back up, so a failed command fails the whole runtime.
+`/proc/self/exe` always points at the running program's own binary, so `run` can start a copy of itself without knowing where you installed it. `exitWith` passes the command's exit code back up, so a failed command fails the whole runtime.
 
 Run it on the node:
 
@@ -113,7 +121,11 @@ The command saw `container`; the node kept `lab-worker`. The child's pid, 1786, 
 
 ### Step 2: process 1 and a root filesystem
 
-Two more changes make it feel like a container. A PID namespace gives the child its own process numbers, so the first process inside is number 1. `chroot` makes the busybox directory the child's `/`. A fresh `/proc` mount makes `ps` read the new process list instead of the node's.
+Three more changes make it feel like a container.
+
+> **Everyday picture.** A hotel key opens one room, and to the guest that room is the whole building: they cannot walk into a room they cannot open. **In Linux,** a container's root filesystem is the room. `chroot` sets which directory a process treats as `/`, the top of all its file paths, so it cannot name a file outside that directory. The design notes cover where this picture leaks.
+
+A PID namespace gives the child its own process numbers, so the first process inside is number 1. `chroot` makes the busybox directory the child's `/`. A fresh `/proc` mount makes `ps` read the new process list instead of the node's.
 
 The diff from step 1, in `step2/main.go`:
 
@@ -163,7 +175,7 @@ Your Go program is process 1. The shell got 6 because the Go runtime's threads t
 
 Step 2 has a leak. Its `/proc` mount lives in the node's mount table, and only the `Unmount` at the end removes it. Kill the container and the mount stays behind (see "Break it" below).
 
-A mount namespace gives the child its own copy of the mount table. One more detail matters on hosts that run systemd, which includes kind nodes: systemd marks `/` as a shared mount, so new mounts propagate between namespaces anyway. The child marks every mount private first.
+> **Everyday picture.** Plug a USB stick into a laptop and its files appear under one folder; unplug it and they vanish. **In Linux,** a mount attaches a filesystem at a folder in the same way, and the mount table is the kernel's list of every attachment. A mount namespace gives the child its own copy of the mount table, so what the container attaches stays out of the node's list. One more detail matters on hosts that run systemd, which includes kind nodes: systemd marks `/` as a shared mount, so new mounts propagate between namespaces anyway. The child marks every mount private first.
 
 From `step3/main.go`:
 
@@ -198,7 +210,10 @@ Programs also expect a few files in `/dev`, and an exported image has none. `mou
 
 ### Step 4: limits
 
-Namespaces control what a process can see. Control groups (cgroups) control how much it can use. A cgroup is a directory under `/sys/fs/cgroup`: you write limits into its files and process ids into its `cgroup.procs` file, and the kernel enforces the limits on every process listed and on all their children.
+Namespaces control what a process can see. Control groups (cgroups) control how much it can use.
+
+> **Everyday picture.** Each hotel room has its own circuit breaker. A guest who runs three heaters at once trips their own breaker and loses power, and the rest of the floor never notices. **In Linux,** a cgroup is that breaker for a group of processes: it caps memory, CPU and the number of processes, and when a container goes over its memory cap the kernel kills a process in it.
+ A cgroup is a directory under `/sys/fs/cgroup`: you write limits into its files and process ids into its `cgroup.procs` file, and the kernel enforces the limits on every process listed and on all their children.
 
 The parent creates the cgroup and writes the limits before the child starts. kind nodes use cgroup v2, where one directory holds every limit:
 
@@ -235,7 +250,7 @@ killed by signal: killed
 137
 ```
 
-The 21st process failed to start. The shell that tried to hold 200 MB in a 50 MiB cgroup got killed by the kernel's out-of-memory killer, and the runtime reported exit code 137, which is 128 plus signal 9. Kubernetes shows the same event as `OOMKilled`.
+The 21st process failed to start. The kernel's out-of-memory killer killed the shell that tried to hold 200 MB in a 50 MiB cgroup, and the runtime reported exit code 137, which is 128 plus signal 9. Kubernetes shows the same event as `OOMKilled`.
 
 ## Run it beside the real one
 
@@ -276,7 +291,7 @@ Clean up with `kubectl delete pod sleeper`.
 
 **Why cgroups v2 put everything in one directory.** In cgroup v1 each controller had its own tree, so a process could sit in different places for memory and for pids, and tools had to keep the trees in step. Version 2 has one tree. That is why the v2 branch in `newCgroup` is shorter than the v1 branch.
 
-**What this does not protect.** Your container runs as the node's real root user, with every capability and no system-call filter. A process inside it can load kernel modules or reboot the node. User namespaces, dropped capabilities and seccomp exist to close those doors.
+**What this does not protect.** Your container runs as the node's real root user, with every capability and no system-call filter. A process inside it can load kernel modules or reboot the node. runc blocks those with user namespaces, dropped capabilities and seccomp.
 
 ## Improving and expanding
 

@@ -8,7 +8,7 @@ MCP Gateway Registry running on the lab cluster through your parts: its MCP serv
 
 ## What the real one does
 
-[MCP Gateway Registry](https://github.com/agentic-community/mcp-gateway-registry) is a gateway and registry for Model Context Protocol servers. The [archived course](../../archive/README.md) deployed it with stock Kubernetes parts; this chapter deploys it with yours.
+[MCP Gateway Registry](https://github.com/agentic-community/mcp-gateway-registry) is a gateway and registry for Model Context Protocol servers. The [archived course](https://github.com/aarora79/k8s-100-to-mcp-gateway) deployed it with stock Kubernetes parts; this chapter deploys it with yours.
 
 ## Scope
 

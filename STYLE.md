@@ -10,6 +10,14 @@ These rules apply to every file in the repo. `make stylecheck` enforces the ones
 - Write in the active voice and name the actor: "the scheduler writes a Binding", not "a Binding is written".
 - Short words and short sentences. Cut words that carry no weight.
 - Spell out an acronym the first time a chapter uses it.
+- Bridge every new term. The first time a chapter introduces a term, give a quote block with an everyday, non-technical example, then map it to the technical meaning with `**In Kubernetes,**` (or `**In Linux,**` for kernel ideas):
+
+  ```text
+  > **Everyday picture.** A thermostat reads the room, compares it with the target and turns the heating on or off. **In Kubernetes,** an object's spec is the target, what runs is the room, and a program that closes the gap in a loop is a controller.
+  ```
+
+  Pick an example the reader already knows, keep it to three or four sentences, and make each part map to something real. Do not stretch the picture past the point where it stops being true; say so in the text instead.
+- Add every new term to [GLOSSARY.md](GLOSSARY.md).
 - Give exact versions, numbers and file names.
 
 ## Diagrams
@@ -28,7 +36,7 @@ These rules apply to every file in the repo. `make stylecheck` enforces the ones
 
 ## Versions
 
-The book is pinned to:
+The book pins these versions:
 
 | Tool | Version |
 | --- | --- |
