@@ -1,14 +1,16 @@
 # GitHub Pages site for the book. The Pages workflow builds it with Jekyll 4.
-title: help-me-learn-k8s
+title: Help me learn Kubernetes
 description: Learn Kubernetes by rebuilding its parts in Go.
 theme: minima
 
+# Every page uses the book layout in _layouts/book.html.
 # Chapters show shell and Go templates such as '{{.Names}}'. Turn Liquid off
 # so Jekyll prints them as written instead of reading them as template tags.
 defaults:
   - scope:
       path: ""
     values:
+      layout: book
       render_with_liquid: false
 
 # Turn links to README.md and other .md files into links to the built pages.
@@ -16,9 +18,22 @@ relative_links:
   enabled: true
   collections: false
 
-# Show only the home page in the site header; the chapter table links the rest.
-header_pages:
+# The reading order. Each page in this list shows "Page N of M" and links to
+# the previous and next page. Add a chapter here when it is written.
+book_pages:
   - README.md
+  - chapters/00-map-and-lab/README.md
+  - chapters/01-container-by-hand/README.md
+  - chapters/02-api-server-with-curl/README.md
+  - chapters/03-mini-kubectl-and-informer/README.md
+  - chapters/04-replicaset-controller/README.md
+  - chapters/05-toy-scheduler/README.md
+  - chapters/06-toy-kubelet/README.md
+  - chapters/07-service-by-hand/README.md
+  - chapters/08-crd-and-operator/README.md
+  - chapters/09-admission-webhook/README.md
+  - chapters/10-tiny-gateway/README.md
+  - chapters/11-capstone-mcp-gateway/README.md
 
 # Files for contributors and agents, not readers.
 exclude:

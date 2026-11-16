@@ -22,20 +22,7 @@ Before the lab, this chapter draws the map: the parts of Kubernetes, how they ta
 
 Kubernetes has one hub. The API server is the only component that reads and writes the cluster's database, etcd. Every other component, including kubectl, talks only to the API server. None of them call each other.
 
-```text
-                         +--------+
-                         |  etcd  |
-                         +---+----+
-                             |  only the API server talks to etcd
-                     +-------+--------+
-     kubectl ------> |   API server   | <------ admission webhooks (ch 9)
-     (ch 2, 3)       +-------+--------+
-                             ^  every component below watches the API server
-        +------------+-------+------+------------+-------------+
-        |            |              |            |             |
-  controllers    scheduler       kubelet     kube-proxy    gateway
-   (ch 4, 8)       (ch 5)     (ch 1, 6)        (ch 7)        (ch 10)
-```
+![The map: kubectl sends requests to the API server; the API server alone talks to etcd and calls admission webhooks; controllers, scheduler, kubelet, kube-proxy and gateway all watch the API server.](images/map.svg)
 
 Each component runs the same pattern. It watches the API server for objects it cares about, compares what the objects ask for with what exists, and acts to close the gap. It then writes what it did back to the API server, where the next component sees it.
 

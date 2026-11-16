@@ -1,4 +1,4 @@
-# help-me-learn-k8s
+# Help me learn Kubernetes
 
 Learn Kubernetes by rebuilding its parts.
 

@@ -73,6 +73,11 @@ make clean       # delete the cluster
 - Spell out an acronym the first time a chapter uses it.
 - Give exact versions, numbers and file names.
 
+## Diagrams
+
+- Draw every diagram as an SVG file in the chapter's `images/` folder (see `chapters/00-map-and-lab/images/map.svg`) and embed it with `![alt text](images/name.svg)`. Never draw ASCII box diagrams in code blocks; stylecheck rejects them.
+- Give the SVG a white background so it reads in dark mode, a `<title>` and a `<desc>`, and alt text that says what the diagram shows.
+
 ## Code rules
 
 - Go only for the builds. Chapters 1 to 3 use the Go standard library only. Later chapters may use client-go and controller-runtime, after the reader has built those pieces by hand.
@@ -118,6 +123,10 @@ A chapter is done when `make lab && make check && make test` passes from a fresh
 ## The website
 
 The book is published at https://aarora79.github.io/k8s-book/ by `.github/workflows/pages.yml`. Jekyll 4 turns every `README.md` into that folder's page and rewrites links between `.md` files, so link chapters with plain relative paths such as `../02-api-server-with-curl/README.md`. Liquid is off for every page (`render_with_liquid: false` in `_config.yml`), so `{{ }}` in Go templates and jsonpath shows as written. `AGENTS.md`, `CLAUDE.md`, `plans/` and `tools/` are left out of the site.
+
+- Every page uses `_layouts/book.html`. It shows one title per page, a page number ("Page 3 of 13") and links to the previous and next page.
+- The reading order is the `book_pages` list in `_config.yml`. Add a new page there if it belongs in the book.
+- `assets/js/copy-code.js` adds a copy button to the top right of every code block. `assets/main.scss` holds the site's extra styles.
 
 To preview the site locally with Docker:
 

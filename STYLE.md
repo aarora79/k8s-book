@@ -12,6 +12,11 @@ These rules apply to every file in the repo. `make stylecheck` enforces the ones
 - Spell out an acronym the first time a chapter uses it.
 - Give exact versions, numbers and file names.
 
+## Diagrams
+
+- Draw every diagram as an SVG file in the chapter's `images/` folder and embed it with `![alt text](images/name.svg)`. No ASCII art diagrams in code blocks.
+- Give the SVG a white background, a `<title>` and a `<desc>`, and write alt text that says what the diagram shows.
+
 ## Code
 
 - Every listing in a README must exist in a step folder and run. Copy snippets from the step folders, never type them into the README by hand.

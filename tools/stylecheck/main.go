@@ -2,7 +2,8 @@
 //
 // In every text file it rejects em-dashes and emojis. In markdown, outside
 // code, it also rejects a double hyphen used as a dash and paragraphs that
-// are hard-wrapped across lines.
+// are hard-wrapped across lines. Inside markdown code blocks it rejects
+// ASCII box diagrams; draw those as SVG files instead.
 //
 // Usage: go run ./tools/stylecheck [root]
 package main
@@ -27,6 +28,8 @@ var (
 	dashLike   = regexp.MustCompile(`\s--\s`)
 	// A line that starts a markdown block other than a plain paragraph.
 	blockStart = regexp.MustCompile(`^(\s*[-*+] |\s*\d+\. |#|\||>|\s*<|!\[|\[\^|\s{4})`)
+	// A box corner such as "+-----" in an ASCII diagram.
+	asciiBox = regexp.MustCompile(`\+-{3,}`)
 )
 
 type problem struct {
@@ -106,6 +109,9 @@ func checkFile(path string) ([]problem, error) {
 			continue
 		}
 		if inFence {
+			if asciiBox.MatchString(line) {
+				out = append(out, problem{path, n, "ASCII diagram (draw it as an SVG in the chapter's images/ folder)"})
+			}
 			continue
 		}
 		prose := inlineCode.ReplaceAllString(line, "")
