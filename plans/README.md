@@ -26,7 +26,7 @@ These files are work orders. Each one describes a chapter to finish: what to bui
 - Bridge every new term: the first time the chapter introduces a term, add an `**Everyday picture.**` quote block that maps a non-technical example to the technical meaning (see `STYLE.md` and chapters 0 to 2), and add the term to `GLOSSARY.md`.
 - Run `make stylecheck` before every commit.
 - Facts marked "verified" in a plan were checked on 2026-11-16 with sources. Facts marked "check" must be confirmed before they go into the chapter text, from kubernetes.io, the Kubernetes source at the pinned tag, or the project's own docs.
-- Update the chapter's row in the top-level README from `Planned` to `Written` when it merges.
+- Update the chapter's row in the top-level README from `Planned` to `Written`, and its `status` in `_data/toc.yml` from `planned` to `written`, when it merges.
 
 ## Git
 

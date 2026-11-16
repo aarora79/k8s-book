@@ -1,0 +1,88 @@
+# The book's reading order. The sidebar, the contents page and the page
+# numbers all come from this file. When you write a chapter, change its
+# status to written. Each page needs a title and a path; chapters also
+# have a number, a summary and a status.
+
+- part: Front matter
+  pages:
+    - title: Contents
+      path: contents.html
+    - title: Introduction
+      path: README.md
+
+- part: Getting started
+  pages:
+    - number: 0
+      title: The map and the lab
+      path: chapters/00-map-and-lab/README.md
+      summary: A kind cluster pinned to Kubernetes 1.34 and a make check that proves it works
+      status: written
+
+- part: "Part 1: A pod pipeline from your own parts"
+  pages:
+    - number: 1
+      title: A container by hand
+      path: chapters/01-container-by-hand/README.md
+      summary: "A container runtime in about 200 lines of Go: namespaces, chroot, cgroups"
+      status: written
+    - number: 2
+      title: Talk to the API server with curl
+      path: chapters/02-api-server-with-curl/README.md
+      summary: Create, watch, patch and delete pods with nothing but curl
+      status: written
+    - number: 3
+      title: A mini kubectl and an informer
+      path: chapters/03-mini-kubectl-and-informer/README.md
+      summary: kk get, kk apply, kk watch and a hand-built informer, standard library only
+      status: planned
+    - number: 4
+      title: A ReplicaSet controller
+      path: chapters/04-replicaset-controller/README.md
+      summary: The reconcile loop
+      status: planned
+    - number: 5
+      title: A toy scheduler
+      path: chapters/05-toy-scheduler/README.md
+      summary: A scheduler that runs beside the default one
+      status: planned
+    - number: 6
+      title: A toy kubelet
+      path: chapters/06-toy-kubelet/README.md
+      summary: A node agent that runs pods with your chapter 1 runtime
+      status: planned
+
+- part: "Part 2: What a real application needs"
+  pages:
+    - number: 7
+      title: A Service by hand
+      path: chapters/07-service-by-hand/README.md
+      summary: A small kube-proxy that writes iptables rules
+      status: planned
+    - number: 8
+      title: A CRD and an operator
+      path: chapters/08-crd-and-operator/README.md
+      summary: An McpServer resource and its controller, then the same with controller-runtime
+      status: planned
+    - number: 9
+      title: An admission webhook
+      path: chapters/09-admission-webhook/README.md
+      summary: A validating and a mutating webhook, then the same rule in CEL
+      status: planned
+    - number: 10
+      title: A tiny gateway
+      path: chapters/10-tiny-gateway/README.md
+      summary: A Gateway API HTTPRoute controller and reverse proxy
+      status: planned
+
+- part: "Part 3: Capstone"
+  pages:
+    - number: 11
+      title: "Capstone: MCP Gateway Registry"
+      path: chapters/11-capstone-mcp-gateway/README.md
+      summary: MCP Gateway Registry running on your parts, then the swap test
+      status: planned
+
+- part: Back matter
+  pages:
+    - title: Glossary
+      path: GLOSSARY.md

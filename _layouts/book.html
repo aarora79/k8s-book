@@ -2,51 +2,19 @@
 <html lang="en">
 {%- include head.html -%}
 <body>
-  {%- if page.url != "/" -%}
-  <header class="site-header">
-    <div class="wrapper">
-      <a class="site-title" href="{{ "/" | relative_url }}">{{ site.title }}</a>
-    </div>
-  </header>
-  {%- endif -%}
+  {%- include book-order.html -%}
+  {%- include sidebar.html -%}
 
-  <main class="page-content">
+  <main class="book-main">
     <div class="wrapper">
       <article>
         {{ content }}
       </article>
-
-      {%- comment -%} Find this page in the reading order set in _config.yml. {%- endcomment -%}
-      {%- assign page_number = 0 -%}
-      {%- for path in site.book_pages -%}
-        {%- if path == page.path -%}
-          {%- assign page_number = forloop.index -%}
-        {%- endif -%}
-      {%- endfor -%}
-
-      {%- if page_number > 0 -%}
-      {%- assign total = site.book_pages | size -%}
-      {%- assign prev_index = page_number | minus: 2 -%}
-      {%- assign next_index = page_number -%}
-      <nav class="book-nav">
-        <span class="book-nav-prev">
-          {%- if page_number > 1 -%}
-          {%- assign prev_page = site.pages | where: "path", site.book_pages[prev_index] | first -%}
-          <a href="{{ prev_page.url | relative_url }}">&larr; {{ prev_page.title }}</a>
-          {%- endif -%}
-        </span>
-        <span class="book-nav-number">Page {{ page_number }} of {{ total }}</span>
-        <span class="book-nav-next">
-          {%- if page_number < total -%}
-          {%- assign next_page = site.pages | where: "path", site.book_pages[next_index] | first -%}
-          <a href="{{ next_page.url | relative_url }}">{{ next_page.title }} &rarr;</a>
-          {%- endif -%}
-        </span>
-      </nav>
-      {%- endif -%}
+      {%- include book-nav.html -%}
     </div>
   </main>
 
   <script src="{{ "/assets/js/copy-code.js" | relative_url }}"></script>
+  <script src="{{ "/assets/js/menu.js" | relative_url }}"></script>
 </body>
 </html>

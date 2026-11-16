@@ -18,23 +18,12 @@ relative_links:
   enabled: true
   collections: false
 
-# The reading order. Each page in this list shows "Page N of M" and links to
-# the previous and next page. Add a chapter here when it is written.
-book_pages:
+# The reading order, the sidebar and the contents page come from _data/toc.yml.
+
+# The cover page (index.html) is the home page, so README.md becomes the
+# Introduction page. Jekyll skips a root README unless it is listed here.
+include:
   - README.md
-  - chapters/00-map-and-lab/README.md
-  - chapters/01-container-by-hand/README.md
-  - chapters/02-api-server-with-curl/README.md
-  - chapters/03-mini-kubectl-and-informer/README.md
-  - chapters/04-replicaset-controller/README.md
-  - chapters/05-toy-scheduler/README.md
-  - chapters/06-toy-kubelet/README.md
-  - chapters/07-service-by-hand/README.md
-  - chapters/08-crd-and-operator/README.md
-  - chapters/09-admission-webhook/README.md
-  - chapters/10-tiny-gateway/README.md
-  - chapters/11-capstone-mcp-gateway/README.md
-  - GLOSSARY.md
 
 # Files for contributors and agents, not readers.
 exclude:

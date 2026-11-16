@@ -24,6 +24,9 @@ The reader has used Kubernetes a little and can read Go. Write for that reader.
 | `lab/check.sh` | Checks tools, versions and cluster health |
 | `tools/stylecheck/` | Go program that enforces the prose rules a program can check |
 | `_config.yml`, `Gemfile` | Jekyll 4 settings for the GitHub Pages site |
+| `_data/toc.yml` | The book's reading order: drives the sidebar, the contents page and page numbers |
+| `index.html`, `contents.html` | The site's cover page and table of contents |
+| `_layouts/`, `_includes/`, `assets/` | Site layouts, sidebar, page navigation, styles and scripts |
 | `.github/workflows/pages.yml` | Builds the site and publishes it on every push to `main` |
 | `LICENSE` | Apache License 2.0 |
 | `GLOSSARY.md` | Every term the book defines, A to Z, with its everyday picture. The last page of the book. |
@@ -118,7 +121,7 @@ Every chapter uses this section order. Chapters 1 and 2 are the model for layout
 3. Write `test.sh` in the style of chapters 1 and 2, and a chapter `Makefile` with at least `test`.
 4. Run every command in the README on the lab cluster, including "Run it beside the real one" and "Break it", and paste the real output.
 5. Add the chapter to `CHAPTERS` in the top-level `Makefile` once its tests pass.
-6. Change the chapter's row in the top-level README from `Planned` to `Written` when it merges.
+6. Change the chapter's row in the top-level README from `Planned` to `Written`, and its `status` in `_data/toc.yml` from `planned` to `written`, when it merges.
 
 A chapter is done when `make lab && make check && make test` passes from a fresh clone on an Apple Silicon Mac and in CI, the README reads top to bottom with every link working, and `make stylecheck` passes.
 
@@ -126,9 +129,11 @@ A chapter is done when `make lab && make check && make test` passes from a fresh
 
 `.github/workflows/pages.yml` publishes the book at https://aarora79.github.io/k8s-book/. Jekyll 4 turns every `README.md` into that folder's page and rewrites links between `.md` files, so link chapters with plain relative paths such as `../02-api-server-with-curl/README.md`. Liquid is off for every page (`render_with_liquid: false` in `_config.yml`), so `{{ }}` in Go templates and jsonpath shows as written. `AGENTS.md`, `CLAUDE.md`, `plans/` and `tools/` are left out of the site.
 
-- Every page uses `_layouts/book.html`. It shows one title per page, a page number ("Page 3 of 13") and links to the previous and next page.
-- The reading order is the `book_pages` list in `_config.yml`. Add a new page there if it belongs in the book. `GLOSSARY.md` stays last.
-- `assets/js/copy-code.js` adds a copy button to the top right of every code block. `assets/main.scss` holds the site's extra styles.
+- `index.html` is the cover page and uses `_layouts/cover.html`. `README.md` is the Introduction page. `contents.html` is the table of contents.
+- Every other page uses `_layouts/book.html`: a sidebar menu (`_includes/sidebar.html`) with every chapter and the glossary, the page content, and a page number with previous and next links (`_includes/book-nav.html`).
+- `_data/toc.yml` is the one source for the reading order. The sidebar, the contents page and the page numbers all read it. When a chapter is written, change its `status` there from `planned` to `written`, and update its row in the README chapter table too (GitHub readers see that table). `GLOSSARY.md` stays last.
+- `index.html` and `contents.html` are site-only pages written in HTML with Liquid turned on in their front matter. Keep chapter text in markdown so it reads on github.com too.
+- `assets/js/copy-code.js` adds a copy button to the top right of every code block. `assets/js/menu.js` opens the sidebar on narrow screens. `assets/main.scss` holds the site's extra styles.
 
 To preview the site locally with Docker:
 

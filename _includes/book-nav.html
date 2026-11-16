@@ -1,0 +1,23 @@
+{%- comment -%} Page number and previous and next links. Needs book-order.html first. {%- endcomment -%}
+{%- if page_number > 0 -%}
+{%- assign total = book_order | size -%}
+{%- assign prev_index = page_number | minus: 2 -%}
+{%- assign next_index = page_number -%}
+<nav class="book-nav">
+  <span class="book-nav-prev">
+    {%- if page_number > 1 -%}
+    {%- assign prev_item = book_order[prev_index] -%}
+    {%- assign prev_page = site.pages | where: "path", prev_item.path | first -%}
+    <a href="{{ prev_page.url | relative_url }}">&larr; {{ prev_item.title }}</a>
+    {%- endif -%}
+  </span>
+  <span class="book-nav-number">Page {{ page_number }} of {{ total }}</span>
+  <span class="book-nav-next">
+    {%- if page_number < total -%}
+    {%- assign next_item = book_order[next_index] -%}
+    {%- assign next_page = site.pages | where: "path", next_item.path | first -%}
+    <a href="{{ next_page.url | relative_url }}">{{ next_item.title }} &rarr;</a>
+    {%- endif -%}
+  </span>
+</nav>
+{%- endif -%}

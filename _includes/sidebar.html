@@ -1,0 +1,24 @@
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-top">
+    <a class="sidebar-title" href="{{ "/" | relative_url }}">{{ site.title }}</a>
+    <button class="menu-button" type="button" aria-controls="sidebar-links" aria-expanded="false">Menu</button>
+  </div>
+  <div class="sidebar-links" id="sidebar-links">
+    {%- for part in site.data.toc -%}
+      {%- unless part.part == "Front matter" or part.part == "Back matter" -%}
+      <p class="sidebar-part">{{ part.part }}</p>
+      {%- endunless -%}
+      <ul>
+        {%- for item in part.pages -%}
+        {%- assign target = site.pages | where: "path", item.path | first -%}
+        <li class="{% if item.path == page.path %}current{% endif %} {% if item.status == "planned" %}planned{% endif %}">
+          <a href="{{ target.url | relative_url }}">
+            {%- if item.number != nil -%}<span class="sidebar-number">{{ item.number }}</span>{%- endif -%}
+            {{ item.title }}
+          </a>
+        </li>
+        {%- endfor -%}
+      </ul>
+    {%- endfor -%}
+  </div>
+</nav>

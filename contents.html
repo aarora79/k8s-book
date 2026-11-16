@@ -1,0 +1,26 @@
+---
+title: Contents
+render_with_liquid: true
+---
+<h1>Contents</h1>
+
+{% for part in site.data.toc %}
+  {%- if part.part == "Front matter" -%}
+    {%- continue -%}
+  {%- endif -%}
+  {%- unless part.part == "Back matter" -%}
+  <h2>{{ part.part }}</h2>
+  {%- endunless -%}
+  <ul class="contents-list">
+    {%- for item in part.pages -%}
+    {%- assign target = site.pages | where: "path", item.path | first -%}
+    <li>
+      <a href="{{ target.url | relative_url }}">
+        {%- if item.number != nil -%}Chapter {{ item.number }}: {% endif -%}{{ item.title }}
+      </a>
+      {%- if item.status == "planned" -%}<span class="contents-status">Planned</span>{%- endif -%}
+      {%- if item.summary -%}<p class="contents-summary">{{ item.summary }}</p>{%- endif -%}
+    </li>
+    {%- endfor -%}
+  </ul>
+{% endfor %}

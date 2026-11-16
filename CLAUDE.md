@@ -10,6 +10,7 @@ A book that teaches Kubernetes by rebuilding its parts in Go, modeled on Herbert
 - `tools/stylecheck/`: enforces the prose rules below.
 - The earlier 13-phase course lives in its own archived repo, https://github.com/aarora79/k8s-100-to-mcp-gateway.
 - `GLOSSARY.md`: every term the book defines. Add new terms there.
+- `_data/toc.yml`: the reading order for the website's sidebar, contents page and page numbers. See AGENTS.md for how the site works.
 
 ## Commands
 

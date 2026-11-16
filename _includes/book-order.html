@@ -1,0 +1,16 @@
+{%- comment -%}
+  Flattens _data/toc.yml into one list, book_order, in reading order,
+  and sets page_number to this page's place in it (0 if it is not listed).
+{%- endcomment -%}
+{%- assign book_order = "" | split: "" -%}
+{%- for part in site.data.toc -%}
+  {%- for item in part.pages -%}
+    {%- assign book_order = book_order | push: item -%}
+  {%- endfor -%}
+{%- endfor -%}
+{%- assign page_number = 0 -%}
+{%- for item in book_order -%}
+  {%- if item.path == page.path -%}
+    {%- assign page_number = forloop.index -%}
+  {%- endif -%}
+{%- endfor -%}
