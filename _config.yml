@@ -1,0 +1,33 @@
+# GitHub Pages site for the book. The Pages workflow builds it with Jekyll 4.
+title: help-me-learn-k8s
+description: Learn Kubernetes by rebuilding its parts in Go.
+theme: minima
+
+# Chapters show shell and Go templates such as '{{.Names}}'. Turn Liquid off
+# so Jekyll prints them as written instead of reading them as template tags.
+defaults:
+  - scope:
+      path: ""
+    values:
+      render_with_liquid: false
+
+# Turn links to README.md and other .md files into links to the built pages.
+relative_links:
+  enabled: true
+  collections: false
+
+# Show only the home page in the site header; the chapter table links the rest.
+header_pages:
+  - README.md
+
+# Files for contributors and agents, not readers.
+exclude:
+  - AGENTS.md
+  - CLAUDE.md
+  - plans/
+  - tools/
+  - Gemfile
+  - Gemfile.lock
+  - go.mod
+  - Makefile
+  - vendor/

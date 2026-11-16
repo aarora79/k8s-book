@@ -1,0 +1,12 @@
+source "https://rubygems.org"
+
+gem "jekyll", "~> 4.4"
+gem "minima", "~> 2.5"
+
+group :jekyll_plugins do
+  gem "jekyll-relative-links"
+  gem "jekyll-optional-front-matter"
+  gem "jekyll-readme-index"
+  gem "jekyll-titles-from-headings"
+  gem "jekyll-default-layout"
+end

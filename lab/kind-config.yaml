@@ -1,0 +1,16 @@
+# The lab cluster for help-me-learn-k8s.
+# One control-plane node and two workers, pinned to Kubernetes 1.34.0.
+# kind 0.30.0 ships this node image; the digest pins it exactly.
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: lab
+nodes:
+  - role: control-plane
+    image: kindest/node:v1.34.0@sha256:7416a61b42b1662ca6ca89f02028ac133a309a2a30ba309614e8ec94d976dc5a
+  - role: worker
+    image: kindest/node:v1.34.0@sha256:7416a61b42b1662ca6ca89f02028ac133a309a2a30ba309614e8ec94d976dc5a
+  - role: worker
+    image: kindest/node:v1.34.0@sha256:7416a61b42b1662ca6ca89f02028ac133a309a2a30ba309614e8ec94d976dc5a
+networking:
+  # Chapter 7 reads and writes the iptables rules that kube-proxy owns.
+  kubeProxyMode: iptables
