@@ -45,14 +45,41 @@ You talk to the API server with kubectl, the Kubernetes command-line tool. When 
 
 ![The map: kubectl sends requests to the API server; the API server alone talks to etcd and calls admission webhooks; controllers, scheduler, kubelet, kube-proxy and gateway all watch the API server.](images/map.svg)
 
-The map shows each part and the chapter where you rebuild it. You meet each one properly in its own chapter. For now, one line each:
+The map shows each part and the chapter where you rebuild it. You meet each one properly in its own chapter, but here is what each one does, so the rest of this chapter makes sense.
 
-- Controllers keep the number of running pods right, and do many other jobs like it (chapters 4 and 8).
-- The scheduler picks a node for each new pod (chapter 5).
-- The kubelet runs on every node and starts that node's pods (chapters 1 and 6).
-- kube-proxy runs on every node and sends network traffic to the right pods (chapter 7).
-- Admission webhooks check each new object before the API server stores it (chapter 9).
-- A gateway lets traffic from outside the cluster reach your pods (chapter 10).
+### The parts on the map
+
+**The scheduler** picks a node for each new pod. When a pod has no node yet, the scheduler looks at every node, drops the ones without enough free memory or CPU, picks the best of the rest, and writes its choice back to the API server. It does not start the pod; it only decides where the pod goes. You build one in chapter 5.
+
+> **Everyday picture.** In the restaurant kitchen, the kitchen manager reads each new ticket that has no station written on it yet. The manager checks which stations have a free burner, writes a station on the ticket, and clips it back on the rail. The manager never cooks.
+>
+> **In Kubernetes,** the scheduler is the kitchen manager, a pod is a ticket, and a node is a cooking station.
+
+**The kubelet** is the agent that runs on every node, one per node. It watches the API server for pods that the scheduler assigned to its own node. When it sees one, it starts that pod's containers, keeps an eye on them, and reports back how they are doing: starting, running, or stopped. The kubelet is the only part of Kubernetes that actually starts your programs. You build one in chapter 6, using the container code from chapter 1.
+
+> **Everyday picture.** Each cooking station has its own cook. The cook watches the rail for tickets marked with their station, cooks those dishes, and writes on each ticket how it is going: "cooking", "ready", "burnt". A cook never takes a ticket meant for another station.
+>
+> **In Kubernetes,** the kubelet is the cook at one station. Every node runs its own kubelet, and each kubelet starts only the pods assigned to its node.
+
+**kube-proxy** also runs on every node, and it handles network traffic. Pods come and go, and each new pod gets a new network address, so other programs need one address that does not change. A Service gives a group of pods that one fixed address. kube-proxy watches the API server for Services and their pods, and writes rules into the Linux kernel, the core of the operating system, so that traffic sent to the Service's address goes to one of its pods. kube-proxy does not carry the traffic itself; the kernel does, following kube-proxy's rules. You build one in chapter 7.
+
+> **Everyday picture.** A company publishes one phone number. Callers always dial that number, and the switchboard forwards each call to a staff member who is free. Staff join and leave, but the published number never changes. Someone has to keep the switchboard's list of staff up to date.
+>
+> **In Kubernetes,** the Service's address is the published number, the pods are the staff, the kernel is the switchboard, and kube-proxy is the person who keeps the switchboard's list up to date.
+
+**Controllers** keep things the way you asked. For example, when you ask for three copies of a pod, a controller counts how many exist and creates or deletes pods until there are three. Kubernetes has dozens of controllers, each with one job. The next section shows how they work. You build one in chapter 4 and another in chapter 8.
+
+**Admission webhooks** check each new or changed object before the API server stores it. A webhook is a small web server of your own that the API server calls with the object. It can refuse the object, for example a pod with no memory limit, or change it, for example by adding a label. You build both kinds in chapter 9.
+
+> **Everyday picture.** In an office mailroom, a clerk checks every parcel before it goes on the shelf. The clerk can send back a parcel with no return address, or stick a missing room number on one before shelving it.
+>
+> **In Kubernetes,** the shelf is etcd, the parcels are objects, and an admission webhook is the clerk: it can refuse an object or change it before the API server stores it.
+
+**A gateway** lets traffic from outside the cluster reach your pods. A request arrives from the internet, the gateway reads which web site and which page it asks for, and sends it to the right Service inside the cluster. You build one in chapter 10.
+
+> **Everyday picture.** At a hotel, outside visitors do not wander the halls. They stop at the front desk, say who they came to see, and the desk sends them to the right room.
+>
+> **In Kubernetes,** the gateway is the front desk, the visitors are requests from outside the cluster, and the rooms are your Services.
 
 ### Every part runs the same loop
 

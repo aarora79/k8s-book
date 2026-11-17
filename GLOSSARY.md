@@ -10,7 +10,7 @@ Every term the book defines, in alphabetical order. Each entry gives the technic
 
 - **Actual state**: what really exists and runs in the cluster right now. Everyday picture: the temperature the room is at. [Chapter 0](chapters/00-map-and-lab/README.md)
 - **Admission**: the API server's third check on a request, after authentication and authorization. Admission plugins and webhooks decide whether the object is acceptable, and may change it. Everyday picture: airport security checking what you carry. [Chapter 2](chapters/02-api-server-with-curl/README.md)
-- **Admission webhook**: an HTTPS server of your own that the API server calls during admission. A validating webhook says yes or no; a mutating webhook may change the object. [Chapter 0](chapters/00-map-and-lab/README.md), built in chapter 9.
+- **Admission webhook**: a small web server of your own that the API server calls before it stores a new or changed object. A validating webhook can refuse the object; a mutating webhook can change it. Everyday picture: a mailroom clerk who checks each parcel before it goes on the shelf. [Chapter 0](chapters/00-map-and-lab/README.md), built in chapter 9.
 - **API server** (kube-apiserver): the hub of a cluster. It is the only component that reads and writes etcd, and every other component, kubectl included, talks only to it over HTTP. Everyday picture: the order rail in a restaurant kitchen, or a bank teller's window. [Chapter 0](chapters/00-map-and-lab/README.md)
 - **Authentication**: the API server's first check on a request: who is asking. Everyday picture: the passport desk at an airport. [Chapter 2](chapters/02-api-server-with-curl/README.md)
 - **Authorization**: the API server's second check on a request: may this user do this action on this resource. Everyday picture: the gate checking your ticket for this flight. [Chapter 2](chapters/02-api-server-with-curl/README.md)
@@ -52,6 +52,10 @@ Every term the book defines, in alphabetical order. Each entry gives the technic
 - **Event**: one line a watch sends when an object changes: `ADDED`, `MODIFIED`, `DELETED` or `ERROR`. [Chapter 2](chapters/02-api-server-with-curl/README.md)
 - **Exit code**: the number a command ends with. 0 means success. A process killed by signal 9 ends with 137. [Chapter 1](chapters/01-container-by-hand/README.md)
 
+## G
+
+- **Gateway**: the entry point for traffic from outside the cluster. It reads which site and page each request asks for and sends it to the right Service. Everyday picture: a hotel front desk. [Chapter 0](chapters/00-map-and-lab/README.md), built in chapter 10.
+
 ## H
 
 - **Hostname**: the name a machine calls itself. [Chapter 1](chapters/01-container-by-hand/README.md)
@@ -72,8 +76,8 @@ Every term the book defines, in alphabetical order. Each entry gives the technic
 - **kubeconfig**: the file that tells kubectl the API server's address and holds your credentials. kind writes it when it builds the cluster. [Chapter 2](chapters/02-api-server-with-curl/README.md)
 - **kubectl proxy**: a kubectl command that listens on your machine, adds your kubeconfig's credentials to each request and forwards it to the API server. [Chapter 2](chapters/02-api-server-with-curl/README.md)
 - **kubectl**: the Kubernetes command-line tool. It is an HTTP client of the API server. Everyday picture: a customer at a bank window. [Chapter 2](chapters/02-api-server-with-curl/README.md)
-- **kubelet**: the agent on each node. It watches for pods bound to its node, starts their containers through the container runtime, reports their status and renews the node's Lease. [Chapter 0](chapters/00-map-and-lab/README.md), built in chapter 6.
-- **kube-proxy**: the agent on each node that turns Services into kernel rules, so traffic sent to a Service's address reaches one of its pods. [Chapter 0](chapters/00-map-and-lab/README.md), built in chapter 7.
+- **kubelet**: the agent on each node, one per node. It watches for pods assigned to its node, starts their containers through the container runtime, reports how they are doing and renews the node's Lease. It is the only part of Kubernetes that starts your programs. Everyday picture: the cook at one kitchen station. [Chapter 0](chapters/00-map-and-lab/README.md), built in chapter 6.
+- **kube-proxy**: the agent on each node that writes rules into the Linux kernel, so traffic sent to a Service's fixed address reaches one of its pods. The kernel carries the traffic; kube-proxy keeps the rules up to date. Everyday picture: the person who keeps a company switchboard's staff list current. [Chapter 0](chapters/00-map-and-lab/README.md), built in chapter 7.
 
 ## L
 
@@ -119,7 +123,7 @@ Every term the book defines, in alphabetical order. Each entry gives the technic
 
 ## S
 
-- **Scheduler** (kube-scheduler): the component that picks a node for each pod that has none and writes a Binding. [Chapter 0](chapters/00-map-and-lab/README.md), built in chapter 5.
+- **Scheduler** (kube-scheduler): the component that picks a node for each pod that has none, and writes its choice back as a Binding. It decides where a pod runs, but does not start it. Everyday picture: the kitchen manager who writes a station on each new ticket. [Chapter 0](chapters/00-map-and-lab/README.md), built in chapter 5.
 - **Service account**: an identity for a program, not a person. The program proves it with a token. Everyday picture: a visitor badge. [Chapter 2](chapters/02-api-server-with-curl/README.md)
 - **Service**: an object that gives a set of pods one stable address. kube-proxy makes traffic to that address reach the pods. [Chapter 0](chapters/00-map-and-lab/README.md), built in chapter 7.
 - **Signal**: a message the kernel sends to a process. Signal 9 means "stop now" and cannot be ignored. [Chapter 1](chapters/01-container-by-hand/README.md)
