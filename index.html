@@ -3,13 +3,14 @@ layout: cover
 title: Help me learn Kubernetes
 render_with_liquid: true
 ---
-<p class="cover-kicker">A book in Go</p>
-<h1 class="cover-title">Help me learn Kubernetes</h1>
-<p class="cover-subtitle">Learn Kubernetes by rebuilding its parts</p>
-
-<img class="cover-art" src="{{ "/chapters/00-map-and-lab/images/map.svg" | relative_url }}" alt="The map of Kubernetes: the API server at the center, etcd above it, and kubectl, admission webhooks, controllers, scheduler, kubelet, kube-proxy and gateway around it.">
-
-<p class="cover-blurb">Each chapter builds one working piece of Kubernetes in Go, runs it on a kind cluster on your laptop beside the real component, and then reads the Kubernetes source to explain where the two differ.</p>
+<div class="book-cover">
+  <p class="cover-kicker">Build it to learn it</p>
+  <h1 class="cover-title">Help me learn Kubernetes</h1>
+  <div class="cover-rule"></div>
+  <p class="cover-subtitle">Rebuild its parts in Go, run them beside the real ones, and read why the real ones differ</p>
+  <img class="cover-art" src="{{ "/assets/images/cover-art.svg" | relative_url }}" alt="The API server at the hub, with etcd, kubectl, admission webhooks, controllers, scheduler, kubelet, kube-proxy and gateway around it.">
+  <p class="cover-bottom">Twelve chapters, one kind cluster</p>
+</div>
 
 <p class="cover-buttons">
   <a class="cover-button primary" href="{{ "/README.html" | relative_url }}">Start reading</a>

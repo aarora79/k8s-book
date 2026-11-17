@@ -216,49 +216,94 @@ $sidebar-width: 280px;
   color: #57606a;
 }
 
-// Cover page.
+// Cover page: a book cover on a soft background, with buttons below it.
+$cover-navy: #0b1d3a;
+$cover-blue: #1e3a8a;
+$cover-gold: #f4b942;
+
 .cover-body {
-  background: #ffffff;
+  background: #eef1f5;
 }
 
 .cover {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 60px 20px 40px 20px;
+  padding: 48px 20px 40px 20px;
   text-align: center;
 }
 
+.book-cover {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+  width: min(440px, 92vw);
+  aspect-ratio: 2 / 3;
+  margin: 0 auto 36px auto;
+  padding: 48px 34px 30px 46px;
+  color: #ffffff;
+  background: linear-gradient(160deg, $cover-blue 0%, $cover-navy 70%);
+  border-radius: 4px 10px 10px 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15), 0 18px 40px rgba(11, 29, 58, 0.35);
+}
+
+// The spine: a darker strip with a crease along the left edge.
+.book-cover::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 16px;
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.35), rgba(255, 255, 255, 0.08) 70%, rgba(0, 0, 0, 0.2));
+  border-radius: 4px 0 0 4px;
+}
+
 .cover-kicker {
-  margin-bottom: 8px;
-  font-size: 14px;
+  margin: 0 0 18px 0;
+  font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: #2a7ae2;
+  letter-spacing: 0.18em;
+  color: $cover-gold;
 }
 
 .cover-title {
-  margin-bottom: 8px;
-  font-size: 48px;
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: min(44px, 9.5vw);
   font-weight: 700;
-  line-height: 1.15;
+  line-height: 1.1;
+  color: #ffffff;
+}
+
+.cover-rule {
+  width: 64px;
+  height: 3px;
+  margin: 20px 0 16px 0;
+  background: $cover-gold;
 }
 
 .cover-subtitle {
-  font-size: 22px;
-  color: #57606a;
+  max-width: 320px;
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.45;
+  color: #c7d2fe;
 }
 
 .cover-art {
-  max-width: 100%;
-  height: auto;
-  margin: 24px 0;
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  margin: 16px 0;
 }
 
-.cover-blurb {
-  max-width: 640px;
-  margin: 0 auto 28px auto;
-  font-size: 18px;
+.cover-bottom {
+  margin: 0;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: #93c5fd;
 }
 
 .cover-buttons {
@@ -272,6 +317,7 @@ $sidebar-width: 280px;
   padding: 10px 22px;
   font-size: 17px;
   color: #24292f;
+  background: #ffffff;
   border: 1px solid #d0d7de;
   border-radius: 8px;
 }
@@ -283,16 +329,17 @@ $sidebar-width: 280px;
 
 .cover-button.primary {
   color: #ffffff;
-  background: #2a7ae2;
-  border-color: #2a7ae2;
+  background: $cover-blue;
+  border-color: $cover-blue;
 }
 
 .cover-button.primary:hover {
-  background: #1f62ba;
+  background: $cover-navy;
 }
 
 .cover-footer {
-  margin-top: 48px;
+  max-width: 600px;
+  margin: 32px auto 0 auto;
   font-size: 14px;
-  color: #828282;
+  color: #6e7781;
 }
