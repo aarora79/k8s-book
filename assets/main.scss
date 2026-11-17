@@ -22,7 +22,9 @@ $code-bg: #f3f1e8;
 $sans: Inter, Roboto, -apple-system, "Segoe UI", system-ui, sans-serif;
 $mono: "JetBrains Mono", "Roboto Mono", ui-monospace, Menlo, Consolas, monospace;
 $sidebar-width: 280px;
-$code-panel-width: clamp(380px, 34vw, 680px);
+// On wide screens the chapter text and the code panel split the space to
+// the right of the sidebar evenly.
+$code-panel-width: calc((100vw - #{$sidebar-width}) / 2);
 
 
 // Page text.
@@ -242,6 +244,13 @@ blockquote {
   margin-left: $sidebar-width;
   margin-right: $code-panel-width;
   padding: 30px 0;
+}
+
+// The text fills its half, instead of sitting in the theme's narrow centered
+// column.
+.book-main .wrapper {
+  max-width: none;
+  padding: 0 36px;
 }
 
 // On narrow screens the sidebar sits on top and folds behind a Menu button.
@@ -583,6 +592,11 @@ a.code-link-active code {
 @media (max-width: 1200px) {
   .book-main {
     margin-right: 0;
+  }
+
+  .book-main .wrapper {
+    max-width: 800px;
+    padding: 0 30px;
   }
 
   .code-panel {
