@@ -4,15 +4,17 @@ Learn Kubernetes by rebuilding its parts.
 
 Read it online at [aarora79.github.io/k8s-book](https://aarora79.github.io/k8s-book/).
 
-Each chapter builds one small, working piece of Kubernetes in Go, runs it on a cluster on your laptop next to the component it copies, and then reads the Kubernetes source to explain where the two differ. By the last chapter, your controller creates a pod, your scheduler places it, your kubelet runs it, your Service rules route traffic to it and your admission webhook checks it.
+Kubernetes is made of a handful of separate programs that work together. In this book you write your own small version of each one, in the Go programming language. Each chapter builds one of them. You run it on a small Kubernetes cluster on your laptop, right beside the real program it copies. Then you read the real program's source code, to see where the two differ and why.
 
-The shape of the book comes from Herbert Schildt's *Born to Code in C* (Osborne/McGraw-Hill, 1989). Schildt did not teach C from the ground up. He assumed you knew the basics and spent each chapter building one complete, useful program: a C interpreter, a text editor, a multitasking kernel. You learned the language by building real things in it. This repo does the same for Kubernetes.
+By the last chapter, your own programs do the whole job. One decides how many copies of a program should run, one picks a machine for each copy, one starts it, one sends network traffic to it, and one checks it before it is allowed in.
+
+The shape of the book comes from Herbert Schildt's *Born to Code in C* (Osborne/McGraw-Hill, 1989). Schildt did not teach C one feature at a time. Each chapter built one complete, useful program, such as a text editor or a small operating system, and you learned the language by building real things in it. This book does the same for Kubernetes.
 
 ## Who this is for
 
-You have used Kubernetes a little: you can apply a manifest and read `kubectl get pods`. You can read Go, or you are willing to learn it as you go. You want to know what happens between `kubectl apply` and a running process, and you learn best by building.
+You want to know what happens inside Kubernetes, and you learn best by building. You can read a little code in some language, and you are willing to pick up Go as you go. You do not need to have used Kubernetes before, though it helps. Every new term is explained the first time it appears, starting from an everyday example.
 
-If you have never run a container, start with the [archived 13-phase course](https://github.com/aarora79/k8s-100-to-mcp-gateway), which goes from zero to a working cluster.
+If you would like a gentler, step-by-step start first, the [archived 13-phase course](https://github.com/aarora79/k8s-100-to-mcp-gateway) goes from zero to a working cluster.
 
 ## Chapters
 
@@ -47,7 +49,9 @@ chapters/04-replicaset-controller/
   ERRATA.md          fixes readers report
 ```
 
-Step 1 is always the smallest version that runs end to end. Each later step adds one idea, so you can diff `step2` against `step3` and see exactly what changed. The README sections are always the same: what you will build, what the real one does, scope, set up, build it, run it beside the real one, break it, design notes, improving and expanding, further reading.
+Step 1 is always the smallest version that works from start to finish. Each later step adds one idea. So if you compare the `step2` folder with the `step3` folder, the only difference is that one idea.
+
+Every chapter has the same sections, in the same order: what you will build, what the real one does, scope, set up, build it, run it beside the real one, break it, design notes, improving and expanding, and further reading.
 
 ## Requirements
 
@@ -55,7 +59,7 @@ Step 1 is always the smallest version that runs end to end. Each later step adds
 - A Docker runtime: Docker Desktop, OrbStack or Colima.
 - Go 1.24 or later, kind 0.30.0, kubectl, curl and jq.
 
-Chapter 0 walks through the install and checks every version.
+Chapter 0 explains what each of these tools does, walks you through installing them, and checks every version.
 
 ## Running the tests
 
@@ -66,7 +70,7 @@ make test    # run every written chapter's tests against the cluster
 make clean   # delete the cluster
 ```
 
-CI runs the same targets on every push. A listing that does not run does not merge.
+Every code sample in the book is copied from a program that runs, and every sample output comes from a real run. The tests above check that this stays true.
 
 ## Style
 

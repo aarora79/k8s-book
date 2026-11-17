@@ -8,7 +8,7 @@ render_with_liquid: true
   <h1 class="cover-title">Help me learn Kubernetes</h1>
   <div class="cover-rule"></div>
   <p class="cover-subtitle">Rebuild its parts in Go, run them beside the real ones, and read why the real ones differ</p>
-  <img class="cover-art" src="{{ "/assets/images/cover-art.svg" | relative_url }}" alt="The API server at the hub, with etcd, kubectl, admission webhooks, controllers, scheduler, kubelet, kube-proxy and gateway around it.">
+  <img class="cover-art" src="{{ "/assets/images/cover-art.svg" | relative_url }}?v={{ site.time | date: '%s' }}" alt="The API server at the hub, with etcd, kubectl, admission webhooks, controllers, scheduler, kubelet, kube-proxy and gateway around it.">
   <p class="cover-bottom">Twelve chapters, one kind cluster</p>
 </div>
 
