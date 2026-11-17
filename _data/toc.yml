@@ -15,7 +15,7 @@
     - number: 0
       title: The map and the lab
       path: chapters/00-map-and-lab/README.md
-      summary: A kind cluster pinned to Kubernetes 1.34 and a make check that proves it works
+      summary: "A practice cluster on your laptop, built with kind (a tool that makes a whole cluster out of containers) and fixed to Kubernetes 1.34.0, plus one command, make check, that proves it works"
       status: written
 
 - part: "Part 1: A pod pipeline from your own parts"
@@ -23,32 +23,32 @@
     - number: 1
       title: A container by hand
       path: chapters/01-container-by-hand/README.md
-      summary: "A container runtime in about 200 lines of Go: namespaces, chroot, cgroups"
+      summary: "A container runtime (the program that starts containers) in about 200 lines of Go, using the Linux features that give a program its own view of the computer (namespaces), its own files (chroot) and limits on what it may use (cgroups)"
       status: written
     - number: 2
       title: Talk to the API server with curl
       path: chapters/02-api-server-with-curl/README.md
-      summary: Create, watch, patch and delete pods with nothing but curl
+      summary: "Create, watch for changes to, change and delete programs, using only curl, a command-line tool that sends web requests"
       status: written
     - number: 3
       title: A mini kubectl and an informer
       path: chapters/03-mini-kubectl-and-informer/README.md
-      summary: kk get, kk apply, kk watch and a hand-built informer, standard library only
+      summary: "kk, your own small kubectl, and an informer, code that keeps an up-to-date local copy of the cluster's records, using only the code that comes with Go"
       status: planned
     - number: 4
       title: A ReplicaSet controller
       path: chapters/04-replicaset-controller/README.md
-      summary: The reconcile loop
+      summary: "The check-and-fix loop that keeps a set number of copies of a program running"
       status: planned
     - number: 5
       title: A toy scheduler
       path: chapters/05-toy-scheduler/README.md
-      summary: A scheduler that runs beside the default one
+      summary: "A scheduler that picks a computer for each program, running beside the real one"
       status: planned
     - number: 6
       title: A toy kubelet
       path: chapters/06-toy-kubelet/README.md
-      summary: A node agent that runs pods with your chapter 1 runtime
+      summary: "An agent for one computer in the cluster that runs programs with your chapter 1 runtime"
       status: planned
 
 - part: "Part 2: What a real application needs"
@@ -56,22 +56,22 @@
     - number: 7
       title: A Service by hand
       path: chapters/07-service-by-hand/README.md
-      summary: A small kube-proxy that writes iptables rules
+      summary: "A small kube-proxy, the program on each computer that keeps the network rules up to date, so one fixed address reaches a group of programs"
       status: planned
     - number: 8
       title: A CRD and an operator
       path: chapters/08-crd-and-operator/README.md
-      summary: An McpServer resource and its controller, then the same with controller-runtime
+      summary: "Your own kind of record (a CRD, custom resource definition) and an operator, a controller that runs one application, then the same with controller-runtime"
       status: planned
     - number: 9
       title: An admission webhook
       path: chapters/09-admission-webhook/README.md
-      summary: A validating and a mutating webhook, then the same rule in CEL
+      summary: "A webhook, a small web server the API server asks before it saves a record; one kind refuses records, the other changes them. Then the same rule in CEL"
       status: planned
     - number: 10
       title: A tiny gateway
       path: chapters/10-tiny-gateway/README.md
-      summary: A Gateway API HTTPRoute controller and reverse proxy
+      summary: "A front door for traffic from outside the cluster, which reads routing rules from Kubernetes and passes each request to the right program"
       status: planned
 
 - part: "Part 3: Capstone"
@@ -79,7 +79,7 @@
     - number: 11
       title: "Capstone: MCP Gateway Registry"
       path: chapters/11-capstone-mcp-gateway/README.md
-      summary: MCP Gateway Registry running on your parts, then the swap test
+      summary: "MCP Gateway Registry running on your parts, then the swap test"
       status: planned
 
 - part: Back matter
