@@ -19,6 +19,7 @@ These files are work orders. Each one describes a chapter to finish: what to bui
 
 - Read `CLAUDE.md`, `STYLE.md`, the top-level `README.md` and the finished chapters 1 and 2 before starting. Chapters 1 and 2 are the model for layout, tone and depth.
 - The chapter's existing `README.md` is its plan in reader-facing form. Replace it with the full chapter, keeping the section order from the top-level README: what you will build, what the real one does, scope, set up, build it, run it beside the real one, break it, design notes, improving and expanding, further reading.
+- Every listing gets a link to its file on GitHub and a **Code walkthrough.** that explains it line by line for a beginner (see `STYLE.md` and chapters 1 and 2).
 - Code lives in `stepN/` folders. Step 1 runs end to end in about 100 lines. Each later step adds one idea. Every step builds with `go build ./...` and passes `go vet ./...` from the repo root.
 - Every code listing in the README is copied from a step folder. Every sample output in the README comes from a real run on the lab cluster, not from memory.
 - Each chapter has a `Makefile` with at least `test`, and a `test.sh` in the style of chapters 1 and 2: named checks that print `ok` or `FAIL` and exit non-zero on any failure. Add the chapter to `CHAPTERS` in the top-level `Makefile` when its tests pass.

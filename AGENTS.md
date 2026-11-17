@@ -88,6 +88,8 @@ make clean       # delete the cluster
 - Go only for the builds. Chapters 1 to 3 use the Go standard library only. Later chapters may use client-go and controller-runtime, after the reader has built those pieces by hand.
 - Step 1 of each chapter runs end to end in about 100 lines. Each later step adds one idea, so `diff step2 step3` shows exactly that idea.
 - Every step folder builds with `go build ./...` and passes `go vet ./...` from the repo root.
+- Walk through every listing. Before a listing, name its file as a link to the file on GitHub (`https://github.com/aarora79/k8s-book/blob/main/...`). After it, add a **Code walkthrough.** paragraph that says in plain words what the code does, then a numbered list that explains it line by line, defining any language feature or flag the reader has not met. The first listing in a chapter that uses a new language (Go, shell) gets a short "how to read this" primer.
+- Link every code file named in prose to the file on GitHub.
 - Copy every code listing in a chapter README from a step folder. Never type a listing into the README by hand.
 - Every sample output in a chapter README comes from a real run on the lab cluster. Never write output from memory.
 - Each chapter's tests pass against a fresh lab cluster and clean up after themselves: namespaces, CRDs, webhooks, iptables chains and background processes.

@@ -27,6 +27,8 @@ These rules apply to every file in the repo. `make stylecheck` enforces the ones
 
 ## Code
 
+- Walk through every listing. Before a listing, name its file as a link to the file on GitHub (`https://github.com/aarora79/k8s-book/blob/main/...`). After it, add a **Code walkthrough.** paragraph that says in plain words what the code does, then a numbered list that explains it line by line, defining any language feature or flag the reader has not met. The first listing in a chapter that uses a new language (Go, shell) gets a short "how to read this" primer.
+- Link every code file named in prose to the file on GitHub.
 - Every listing in a README must exist in a step folder and run. Copy snippets from the step folders, never type them into the README by hand.
 - Step 1 of each chapter runs end to end in about 100 lines.
 - Chapters 1 to 3 use only the Go standard library. Later chapters may use client-go, after the reader has built its pieces by hand.

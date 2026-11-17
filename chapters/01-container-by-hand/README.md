@@ -73,6 +73,24 @@ make shell
 
 ## Build it
 
+### Before you start: how to read the Go in this chapter
+
+You do not need to know Go to follow this chapter. The code uses only a handful of Go features, and here they are, so nothing in the listings is a surprise.
+
+> **Everyday picture.** A recipe book has one recipe called "dinner" that says "make the soup, then make the bread", and separate recipe cards for the soup and the bread. **In Go,** each recipe card is a function: a named block of steps. The program always starts at the function called `main`, and `main` calls the other functions in turn.
+
+- `package main` on the first line says "this file is a program you can run".
+- `import` lists the parts of Go's standard library the program borrows. This chapter uses `fmt` to print text, `os` to read the command line and exit, `os/exec` to start other programs, and `syscall` to make system calls, the requests a program sends to the kernel.
+- `func run(args []string)` starts a function called `run`. Inside the brackets is what it takes: `args`, a list of text values. In Go, `[]string` means "a list of strings", and a string is a piece of text.
+- `cmd := exec.Command(...)` makes a new variable called `cmd` and stores a value in it. A variable is a named box that holds a value.
+- `os.Args` is the list of words you typed to start the program. For `step1 run hostname`, `os.Args[0]` is `step1`, `os.Args[1]` is `run` and `os.Args[2]` is `hostname`. `os.Args[2:]` means "every word from position 2 to the end".
+- Many Go functions hand back an error value. The value `nil` means "no error". This chapter checks errors with a tiny helper function, `must`, which prints the error and stops the program if anything went wrong.
+- `&syscall.SysProcAttr{...}` builds a record of settings, with named fields inside the curly brackets. The `&` in front hands over the record itself, rather than a copy.
+- `syscall.CLONE_NEWUTS | syscall.CLONE_NEWPID` joins two settings into one value with `|`, so both apply.
+- Lines that start with `//` are comments: notes for the reader that Go ignores.
+
+Each listing below is labeled with the file it comes from, and each file name links to the full file on GitHub. The listings show only the lines that matter for that step.
+
 ### Step 1: a new hostname
 
 The smallest container changes one thing: the hostname, the name a machine calls itself.
@@ -85,7 +103,35 @@ Now the trick in the code. The program starts itself twice. The first copy, `run
 
 Why start twice? Because the setup has to happen inside the new namespace, before your command starts. Linux starts a new program in two steps. First `fork` makes a copy of the running process, then `exec` swaps that copy for the new program. A C program can run its own setup code between those two steps. Go does not allow that, so instead the program restarts itself inside the namespace and does the setup at the start of that second copy.
 
-From `step1/main.go`:
+Start where Go starts, at `main`. From [`step1/main.go`](https://github.com/aarora79/k8s-book/blob/main/chapters/01-container-by-hand/step1/main.go):
+
+```go
+func main() {
+	if len(os.Args) < 3 {
+		fmt.Fprintln(os.Stderr, "usage: step1 run <command> [args...]")
+		os.Exit(2)
+	}
+	switch os.Args[1] {
+	case "run":
+		run(os.Args[2:])
+	case "child":
+		child(os.Args[2:])
+	default:
+		fmt.Fprintf(os.Stderr, "unknown command %q\n", os.Args[1])
+		os.Exit(2)
+	}
+}
+```
+
+**Code walkthrough.** `main` decides which of the two jobs to do.
+
+1. `if len(os.Args) < 3` counts the words you typed. Fewer than three means you left something out, so the program prints how to use it and stops with `os.Exit(2)`. An exit code of 2 is the usual way to say "you called me wrong".
+2. `switch os.Args[1]` looks at the second word and picks a branch. A `switch` is a list of cases, and Go runs the first case that matches.
+3. When you type `step1 run hostname`, the second word is `run`, so `main` calls `run` with the rest of the words, `[hostname]`.
+4. The `child` case is not for you to type. The program uses it when it starts its own second copy, as you see next.
+5. Any other word reaches `default`, which prints an error and stops.
+
+Now the two functions that do the work, from the same file:
 
 ```go
 // run starts this same program again as "child", inside a new UTS namespace.
@@ -111,7 +157,53 @@ func child(args []string) {
 }
 ```
 
-`/proc/self/exe` is a special path that always leads to the file of the program that is running. With it, `run` can start a copy of itself without knowing where you installed it. Every command ends with a number, its exit code, where 0 means success. `exitWith` passes your command's exit code back up, so when your command fails, the runtime fails too.
+**Code walkthrough.** First `run`, which runs in the parent:
+
+1. `fmt.Printf("parent: pid %d, ...")` prints the parent's pid, so you can compare it with the child's later. `%d` is a slot that `Printf` fills with a number, and `%v` is a slot for any value.
+2. `exec.Command("/proc/self/exe", ...)` prepares, but does not yet start, a new process. `/proc/self/exe` is a special path that always leads to the file of the program that is running. So the new process is a second copy of this same program, and `run` does not need to know where you installed it.
+3. `append([]string{"child"}, args...)` builds the new copy's command line: the word `child`, followed by your words. So the second copy starts as `step1 child hostname`, and its `main` picks the `child` case. The `...` after `args` spreads the list out into separate words.
+4. `cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr` connects the new process to your terminal. Stdin is what you type, stdout is normal output and stderr is error output. Without this line, you would see nothing the child prints.
+5. `cmd.SysProcAttr = &syscall.SysProcAttr{Cloneflags: syscall.CLONE_NEWUTS}` is the line that makes it a container. It asks the kernel to create the new process inside a new UTS namespace.
+6. `exitWith(cmd.Run())` starts the process, waits for it to finish, and passes on how it ended.
+
+Then `child`, which runs in the second copy, already inside the new namespace:
+
+1. It prints its own pid.
+2. `syscall.Sethostname([]byte("container"))` asks the kernel to change the hostname to `container`. The kernel wants raw bytes, not text, and `[]byte(...)` converts one to the other. Because the child has its own UTS namespace, this changes only the child's hostname.
+3. `exec.Command(args[0], args[1:]...)` prepares your command. The first word, `args[0]`, is the program to run, and the rest are its arguments.
+4. It connects your terminal again, then runs your command and passes on how it ended.
+
+Last, the two small helpers at the bottom of the file:
+
+```go
+// exitWith exits with the command's own exit code, so callers can tell
+// success from failure.
+func exitWith(err error) {
+	if exitErr, ok := err.(*exec.ExitError); ok {
+		if ws, ok := exitErr.Sys().(syscall.WaitStatus); ok && ws.Signaled() {
+			fmt.Fprintf(os.Stderr, "killed by signal: %v\n", ws.Signal())
+			os.Exit(128 + int(ws.Signal()))
+		}
+		os.Exit(exitErr.ExitCode())
+	}
+	must(err)
+	os.Exit(0)
+}
+
+func must(err error) {
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "error:", err)
+		os.Exit(1)
+	}
+}
+```
+
+1. Every command ends with an exit code, a number where 0 means success. `exitWith` makes the runtime end with the same code as your command, so a script that runs your container can tell whether the command worked.
+2. `err.(*exec.ExitError)` asks "did the command run, but end with a failure?" If so, `ok` is true.
+3. `ws.Signaled()` asks "was the command killed by a signal?" If so, the runtime prints which signal and exits with 128 plus the signal's number. That is the same rule a Linux shell follows, which is why you see 137 in step 4.
+4. Otherwise, it exits with the command's own code.
+5. If the error was something else, for example a command that does not exist, `must(err)` prints it and exits with 1. If there was no error at all, the runtime exits with 0.
+6. `must` is the helper from the primer above: if `err` is not `nil`, print it and stop.
 
 Run it on the node:
 
@@ -143,7 +235,7 @@ Here the busybox folder becomes the child's `/`.
 
 Third, the process list. Tools like `ps` read the list of processes from `/proc`, a folder the kernel fills in as you read it. The child gets a fresh `/proc` that shows only the processes in its own PID namespace.
 
-The diff from step 1, in `step2/main.go`:
+The diff from step 1, in [`step2/main.go`](https://github.com/aarora79/k8s-book/blob/main/chapters/01-container-by-hand/step2/main.go):
 
 ```go
 	cmd.SysProcAttr = &syscall.SysProcAttr{
@@ -166,6 +258,17 @@ The diff from step 1, in `step2/main.go`:
 	must(syscall.Unmount("/proc", 0))
 	exitWith(err)
 ```
+
+**Code walkthrough.** The diff shows only what changed from step 1. In [`step2/main.go`](https://github.com/aarora79/k8s-book/blob/main/chapters/01-container-by-hand/step2/main.go):
+
+1. `syscall.CLONE_NEWUTS | syscall.CLONE_NEWPID` asks for two namespaces now, the UTS namespace from step 1 plus a new PID namespace.
+2. `syscall.Chroot(rootfs)` makes the busybox folder the child's `/`. `rootfs` holds the folder you typed after `run`, here `/root/rootfs`.
+3. `os.Chdir("/")` moves the child into its new `/`. `chroot` changes where paths start, but not the folder the process is standing in, so without this line the child would still be standing in a folder outside its new root.
+4. `syscall.Mount("proc", "/proc", "proc", 0, "")` mounts a fresh `/proc`. Read the five values in order: what to mount (`proc`), where to put it (`/proc`), what kind of filesystem it is (also `proc`), extra settings (`0`, none), and extra options (`""`, none). Because this happens inside the new PID namespace, the new `/proc` lists only the child's processes.
+5. `err := cmd.Run()` runs your command, and keeps the result in `err` instead of exiting right away.
+6. `syscall.Unmount("/proc", 0)` takes the `/proc` mount away again, then `exitWith(err)` ends the program. Remember these two lines: step 3 shows why they are not enough.
+
+Now run it. The `sh -c '...'` part asks busybox's shell to run three commands: print its own pid (`$$`), list the processes, and list the files in `/`:
 
 ```bash
 step2 run /root/rootfs /bin/sh -c 'echo "my pid is $$"; ps; ls /'
@@ -197,7 +300,7 @@ Step 2 mounted the fresh `/proc`, but it had no mount namespace. So that mount w
 
 Step 3 adds a mount namespace. One more detail matters here. On machines that run systemd, which includes kind nodes, systemd marks every mount as shared. A shared mount copies new mounts into other namespaces, which would undo the point of the namespace. So the child first marks every mount private.
 
-From `step3/main.go`:
+From [`step3/main.go`](https://github.com/aarora79/k8s-book/blob/main/chapters/01-container-by-hand/step3/main.go):
 
 ```go
 		// New: CLONE_NEWNS gives the child its own list of mounts.
@@ -216,17 +319,47 @@ From `step3/main.go`:
 	must(mountDev())
 ```
 
+**Code walkthrough.** In [`step3/main.go`](https://github.com/aarora79/k8s-book/blob/main/chapters/01-container-by-hand/step3/main.go):
+
+1. `syscall.CLONE_NEWNS` adds a mount namespace. (NS stands for "namespace". Mount namespaces were the first kind Linux had, so they got the plain name.)
+2. `syscall.Mount("", "/", "", syscall.MS_PRIVATE|syscall.MS_REC, "")` changes a setting on existing mounts instead of making a new one. `MS_PRIVATE` marks a mount private, so new mounts under it are not copied to other namespaces. `MS_REC` means "and every mount below it too". Together they make every mount the child can see private.
+3. The `chroot`, `chdir` and `/proc` lines are the same as step 2.
+4. `mountDev()` is new, and the next listing shows it.
+
 The `Unmount` at the end is gone. When the last process in the namespace exits, the kernel throws away the namespace, and its mounts go with it.
 
 Programs also expect a few special files in `/dev`, such as `/dev/null`, which throws away anything written to it. Our busybox folder has an empty `/dev`. So `mountDev` mounts a `tmpfs` there (a small filesystem that lives in memory) and creates four device files in it. The kernel names each device with two numbers. The first, the major number, picks the driver; major 1 is the driver for memory devices. The second, the minor number, picks the device; on every Linux system, major 1 with minor 3 is `/dev/null`:
 
 ```go
+func mountDev() error {
+	if err := os.MkdirAll("/dev", 0o755); err != nil {
+		return err
+	}
+	if err := syscall.Mount("tmpfs", "/dev", "tmpfs", syscall.MS_NOSUID, "mode=755"); err != nil {
+		return err
+	}
 	for name, minor := range map[string]int{"null": 3, "zero": 5, "random": 8, "urandom": 9} {
 		dev := 1<<8 | minor // major 1, the "memory devices" driver
 		if err := syscall.Mknod("/dev/"+name, syscall.S_IFCHR|0o666, dev); err != nil {
 			return err
 		}
+		if err := os.Chmod("/dev/"+name, 0o666); err != nil { // undo the umask
+			return err
+		}
+	}
+	return nil
+}
 ```
+
+**Code walkthrough.** `mountDev` in [`step3/main.go`](https://github.com/aarora79/k8s-book/blob/main/chapters/01-container-by-hand/step3/main.go):
+
+1. `os.MkdirAll("/dev", 0o755)` makes sure the folder `/dev` exists. `0o755` is a set of file permissions, written in base 8: the owner may read, write and enter the folder, and everyone else may read and enter it.
+2. `syscall.Mount("tmpfs", "/dev", "tmpfs", syscall.MS_NOSUID, "mode=755")` mounts an empty in-memory filesystem on `/dev`. `MS_NOSUID` is a safety setting: it stops any program on this filesystem from gaining extra powers when it starts.
+3. `map[string]int{"null": 3, ...}` is a lookup table from a device name to its minor number. `for name, minor := range ...` goes through the table one pair at a time.
+4. `1<<8 | minor` packs the major and minor numbers into one number, the way the kernel expects: the major number 1 is moved up 8 binary places, to 256, and the minor number fills the lower places. For `null` that gives 256 plus 3.
+5. `syscall.Mknod(...)` creates the device file. `S_IFCHR` says it is a character device, one that reads and writes a stream of bytes, and `0o666` lets everyone read and write it.
+6. `os.Chmod(..., 0o666)` sets the permissions again. Linux quietly removes some permissions from every new file (a setting called the umask), and this line puts them back.
+7. If any step fails, `return err` hands the error back to the caller, where `must` reports it.
 
 ### Step 4: limits
 
@@ -236,7 +369,39 @@ Namespaces control what a process can see. Control groups, or cgroups, control h
 
 You work with a cgroup through ordinary files. Each cgroup is a folder under `/sys/fs/cgroup`. You write a limit into one of its files, and you write a pid into its `cgroup.procs` file to put that process in the group. From then on, the kernel holds that process, and every process it starts, to the limits.
 
-The parent creates the cgroup and writes the limits before the child starts. Linux has two versions of cgroups. kind nodes use version 2, where one folder holds every limit:
+Start with the parent. Its `run` function now sets up the cgroup before it starts the child. From [`step4/main.go`](https://github.com/aarora79/k8s-book/blob/main/chapters/01-container-by-hand/step4/main.go):
+
+```go
+func run(rootfs string, args []string, pids, memMB int) {
+	fmt.Printf("parent: pid %d, starting %v\n", os.Getpid(), args)
+
+	// New: create the cgroup and set its limits before the child starts.
+	cg, err := newCgroup(fmt.Sprintf("hmlk8s-%d", os.Getpid()), pids, memMB)
+	must(err)
+	defer cg.remove()
+
+	cmd := exec.Command("/proc/self/exe", append([]string{"child", rootfs}, args...)...)
+	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
+	cmd.Env = append(os.Environ(), "HMLK8S_CGROUP_PROCS="+cg.procsFiles())
+	cmd.SysProcAttr = &syscall.SysProcAttr{
+		Cloneflags: syscall.CLONE_NEWUTS | syscall.CLONE_NEWPID | syscall.CLONE_NEWNS,
+	}
+	err = cmd.Run()
+	cg.remove() // os.Exit below skips deferred calls
+	exitWith(err)
+}
+```
+
+**Code walkthrough.**
+
+1. `run` now takes two more values, `pids` and `memMB`: the process limit and the memory limit in MiB. `main` reads them from the `-pids` and `-memory-mb` options you type, using Go's `flag` package, and uses 20 and 100 when you leave them out.
+2. `fmt.Sprintf("hmlk8s-%d", os.Getpid())` builds a name such as `hmlk8s-4127` from the parent's pid, so two containers never pick the same cgroup name.
+3. `newCgroup(...)` creates the cgroup folder and writes the limits. It returns two values, the cgroup and an error, and `must(err)` stops if creating it failed.
+4. `defer cg.remove()` says "when `run` finishes, delete the cgroup". `defer` schedules a line to run at the end of the function.
+5. `cmd.Env = append(os.Environ(), "HMLK8S_CGROUP_PROCS="+cg.procsFiles())` gives the child every environment variable the parent has, plus one more, which holds the path of the cgroup's `cgroup.procs` file.
+6. After the child finishes, `cg.remove()` runs once more by hand. The comment says why: `os.Exit`, inside `exitWith`, ends the program at once and skips anything scheduled with `defer`.
+
+Next, the limits themselves. Linux has two versions of cgroups. kind nodes use version 2, where one folder holds every limit. Inside `newCgroup`:
 
 ```go
 		return cg, cg.write([][2]string{
@@ -245,6 +410,13 @@ The parent creates the cgroup and writes the limits before the child starts. Lin
 			{"memory.swap.max", "0"},
 		})
 ```
+
+**Code walkthrough.** These lines write three files in the new cgroup folder:
+
+1. `pids.max` gets the process limit, for example `20`.
+2. `memory.max` gets the memory limit in bytes. Earlier in `newCgroup`, the line `mem := strconv.Itoa(memMB * 1024 * 1024)` turned MiB into bytes and then into text, because cgroup files hold text.
+3. `memory.swap.max` gets `0`. Swap is disk space that Linux can use as extra memory. With swap at 0, a container that goes over its memory limit is stopped, instead of quietly spilling onto the disk.
+4. `cg.write` writes each pair in order, and returns an error if a required file is missing.
 
 The child puts itself in the cgroup before it runs anything else. It writes `0` to `cgroup.procs`, and `0` there means "the process doing the writing". Why not write its own pid? Because inside the PID namespace the child's pid is 1, and the kernel would read that as the node's process 1, the wrong process:
 
@@ -256,7 +428,14 @@ The child puts itself in the cgroup before it runs anything else. It writes `0` 
 	}
 ```
 
-How does the child know which cgroup to join? The parent tells it through an environment variable, a named setting that a process passes on to the processes it starts. The parent cannot share a Go variable, because the child is a fresh copy of the program with its own memory. When the container exits, the parent deletes the cgroup folder. `step4/main.go` also works on older machines that use cgroup version 1, where each kind of limit has its own folder tree.
+**Code walkthrough.**
+
+1. `os.Getenv("HMLK8S_CGROUP_PROCS")` reads the environment variable the parent set.
+2. `filepath.SplitList(...)` splits it into a list of paths. On cgroup version 2 there is just one path; on version 1 there are two, one per kind of limit.
+3. `os.WriteFile(f, []byte("0"), 0o644)` writes `0` into each `cgroup.procs` file, which moves the child into the cgroup.
+4. Everything the child starts after this, including your command, is held to the limits.
+
+How does the child know which cgroup to join? The parent tells it through an environment variable, a named setting that a process passes on to the processes it starts. The parent cannot share a Go variable, because the child is a fresh copy of the program with its own memory. When the container exits, the parent deletes the cgroup folder. [`step4/main.go`](https://github.com/aarora79/k8s-book/blob/main/chapters/01-container-by-hand/step4/main.go) also works on older machines that use cgroup version 1, where each kind of limit has its own folder tree.
 
 ```bash
 step4 run -pids 20 /root/rootfs /bin/sh -c 'for i in $(seq 1 40); do sleep 1 & done; wait'

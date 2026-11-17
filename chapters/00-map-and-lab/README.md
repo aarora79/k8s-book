@@ -124,7 +124,7 @@ make lab
 make check
 ```
 
-`make lab` asks kind to build the cluster described in `lab/kind-config.yaml`, then waits until every node says it is Ready. That file names the exact Kubernetes build to use, by a fingerprint of its contents called a digest. Because of the digest, every reader runs the same Kubernetes programs, byte for byte.
+`make lab` asks kind to build the cluster described in [`lab/kind-config.yaml`](https://github.com/aarora79/k8s-book/blob/main/lab/kind-config.yaml), then waits until every node says it is Ready. That file names the exact Kubernetes build to use, by a fingerprint of its contents called a digest. Because of the digest, every reader runs the same Kubernetes programs, byte for byte.
 
 `make check` then tests the tools and the cluster, and prints `ok` or `FAIL` for each test. Now ask the cluster for its nodes:
 
@@ -192,9 +192,9 @@ Why kind, and not a lighter tool? kind runs the same programs that a production 
 
 ## Improving and expanding
 
-1. Easy: add a third worker node to `lab/kind-config.yaml`, then delete and recreate the cluster. Chapter 5's scheduler has more choices to make with more nodes.
+1. Easy: add a third worker node to [`lab/kind-config.yaml`](https://github.com/aarora79/k8s-book/blob/main/lab/kind-config.yaml), then delete and recreate the cluster. Chapter 5's scheduler has more choices to make with more nodes.
 2. Easy: run `kubectl get --raw /api/v1/nodes | jq '.items[].status.nodeInfo'`. It asks the API server for every node, and jq picks out what each node reports about itself. Compare the three.
-3. Medium: change `kubeProxyMode` in `lab/kind-config.yaml` from `iptables` to `nftables`. Both are ways to write network rules into the Linux kernel; nftables is the newer one. Recreate the cluster, and run `docker exec lab-worker nft list ruleset | head -50` to see the rules. Chapter 7 explains them.
+3. Medium: change `kubeProxyMode` in [`lab/kind-config.yaml`](https://github.com/aarora79/k8s-book/blob/main/lab/kind-config.yaml) from `iptables` to `nftables`. Both are ways to write network rules into the Linux kernel; nftables is the newer one. Recreate the cluster, and run `docker exec lab-worker nft list ruleset | head -50` to see the rules. Chapter 7 explains them.
 
 ## Further reading
 

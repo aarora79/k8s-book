@@ -63,7 +63,7 @@ cd chapters/02-api-server-with-curl
 make proxy
 ```
 
-Every script first reads `env.sh`. That file sets two variables. `API=http://127.0.0.1:8001` is the proxy's address (`127.0.0.1` always means "this machine"). `NS=ch02` is the Kubernetes namespace the scripts work in. A Kubernetes namespace, as chapter 1 warned, is a folder for objects, so this chapter's objects stay apart from everything else.
+Every script first reads [`env.sh`](https://github.com/aarora79/k8s-book/blob/main/chapters/02-api-server-with-curl/env.sh). That file sets two variables. `API=http://127.0.0.1:8001` is the proxy's address (`127.0.0.1` always means "this machine"). `NS=ch02` is the Kubernetes namespace the scripts work in. A Kubernetes namespace, as chapter 1 warned, is a folder for objects, so this chapter's objects stay apart from everything else.
 
 ## Build it
 
@@ -75,7 +75,44 @@ How does a client find out which kinds exist, and where?
 
 > **Everyday picture.** The board in an office lobby lists which company sits on which floor, so a visitor finds the right door without asking around. **In Kubernetes,** a few special paths, called the discovery endpoints, are that board. They list every kind of object the API server knows, and the path where each one lives.
 
-`step1/explore.sh` reads the board:
+[`step1/explore.sh`](https://github.com/aarora79/k8s-book/blob/main/chapters/02-api-server-with-curl/step1/explore.sh) reads the board. It is the first script in this chapter, so read it slowly: every later script uses the same building blocks. From [`step1/explore.sh`](https://github.com/aarora79/k8s-book/blob/main/chapters/02-api-server-with-curl/step1/explore.sh):
+
+```bash
+#!/usr/bin/env bash
+# Step 1: look around. Every path here is a plain HTTP GET.
+set -euo pipefail
+. "$(dirname "$0")/../env.sh"
+
+echo "== version"
+curl -sS "$API/version" | jq '{gitVersion, platform}'
+
+echo "== the core group: /api/v1 and some of its resources"
+curl -sS "$API/api/v1" | jq -r '.resources[] | select(.name | contains("/") | not) | .name' | head -12
+
+echo "== named groups under /apis"
+curl -sS "$API/apis" | jq -r '.groups[].preferredVersion.groupVersion' | head -12
+
+echo "== one resource, described"
+curl -sS "$API/api/v1" | jq '.resources[] | select(.name == "pods") | {name, namespaced, kind, verbs}'
+```
+
+**How to read a script.** A shell script runs its lines from top to bottom, as if you typed them one by one.
+
+> **Everyday picture.** On a factory line, each worker does one job and hands the piece to the next worker. **In the shell,** the pipe sign `|` is that hand-off: it sends the output of the command on its left into the command on its right.
+
+**Code walkthrough.**
+
+1. `#!/usr/bin/env bash` on the first line says "run this file with bash", the shell program.
+2. `set -euo pipefail` makes the script strict. `-e` stops at the first command that fails. `-u` treats a misspelled variable name as an error instead of as empty. `pipefail` makes a chain of `|` steps fail if any step in it fails.
+3. `. "$(dirname "$0")/../env.sh"` reads the settings file. `$0` is the path of this script, `dirname` cuts off the file name to leave its folder, and `$(...)` runs a command and drops its output into the line. So this reads [`env.sh`](https://github.com/aarora79/k8s-book/blob/main/chapters/02-api-server-with-curl/env.sh) from the folder above the script, and `$API` and `$NS` are now set.
+4. `echo "== version"` prints a heading, so you can tell the outputs apart.
+5. `curl -sS "$API/version"` sends a `GET` request to the path `/version`. `-s` turns off curl's progress bar, and `-S` still shows errors. `GET` is curl's default, so it is not written out.
+6. `| jq '{gitVersion, platform}'` hands the JSON answer to jq, which keeps just two fields.
+7. The next `curl` reads `/api/v1`. Its jq filter goes through every entry in `.resources`, keeps only names without a `/` in them, and prints each name. (Names with a `/`, such as `pods/log`, are smaller parts of another resource.) `head -12` keeps the first 12 lines.
+8. The third `curl` reads `/apis` and prints the group and version of each named group.
+9. The last `curl` picks out the entry for pods, and shows its name, whether it lives in a namespace, its kind, and its verbs: the actions the API server allows on it.
+
+Run it:
 
 ```bash
 bash step1/explore.sh
@@ -105,7 +142,37 @@ This is how kubectl knows that `kubectl get deploy` means the path `/apis/apps/v
 
 ### Step 2: create, read, patch, delete
 
-These are the four basic actions on any object: create, read, update and delete, often shortened to CRUD. `step2/crud.sh` first creates the `ch02` namespace, then creates a pod from the JSON in `step2/pod.json`:
+These are the four basic actions on any object: create, read, update and delete, often shortened to CRUD. The script creates a pod from this file, [`step2/pod.json`](https://github.com/aarora79/k8s-book/blob/main/chapters/02-api-server-with-curl/step2/pod.json):
+
+```json
+{
+  "apiVersion": "v1",
+  "kind": "Pod",
+  "metadata": {
+    "name": "hello",
+    "labels": { "app": "hello" }
+  },
+  "spec": {
+    "containers": [
+      {
+        "name": "main",
+        "image": "busybox:1.37",
+        "command": ["sleep", "3600"]
+      }
+    ]
+  }
+}
+```
+
+**Code walkthrough.** This is the smallest pod you can ask for.
+
+1. `apiVersion` and `kind` say what kind of object this is: a `Pod`, from version `v1` of the core group.
+2. `metadata` holds facts about the object itself. `name` is `hello`, and `labels` tags it with `app: hello`.
+3. `spec` says what you want. Here it asks for one container, called `main`.
+4. `image` names the image to run, busybox at version 1.37.
+5. `command` is what the container runs: `sleep 3600`, which waits for an hour. It does nothing useful, but it keeps the container alive long enough to look at.
+
+[`step2/crud.sh`](https://github.com/aarora79/k8s-book/blob/main/chapters/02-api-server-with-curl/step2/crud.sh) first creates the `ch02` namespace, then sends that file to the API server:
 
 ```bash
 curl -sS -X POST "$API/api/v1/namespaces/$NS/pods" \
@@ -113,6 +180,17 @@ curl -sS -X POST "$API/api/v1/namespaces/$NS/pods" \
   -d @"$here/pod.json" \
   | jq '{name: .metadata.name, uid: .metadata.uid, resourceVersion: .metadata.resourceVersion, phase: .status.phase}'
 ```
+
+**Code walkthrough.**
+
+1. `-X POST` sets the method. `POST` means "create".
+2. The path `$API/api/v1/namespaces/$NS/pods` names where the new object goes: the pods in the `ch02` namespace.
+3. `-H 'Content-Type: application/json'` adds a header that says the body of the request is JSON.
+4. `-d @"$here/pod.json"` sends the request body. The `@` tells curl to read the body from a file, here `pod.json` in the script's own folder.
+5. The `\` at the end of a line means "this command goes on, on the next line".
+6. The jq filter builds a small summary of the answer with four fields: the name, the `uid`, the `resourceVersion` and the pod's phase.
+
+The script then reads the pod back with a plain `GET`, and lists every pod whose label is `app=hello` by adding `?labelSelector=app%3Dhello` to the path. (`%3D` is how a URL writes `=`.)
 
 The API server answers with the object as it stored it. Look closely, and you see fields you never sent. It added a `uid` (an id that no other object will ever have), a `creationTimestamp`, a `resourceVersion`, and many default settings in `spec`, the part of the object that says what you want.
 
@@ -123,6 +201,15 @@ curl -sS -X PATCH "$API/api/v1/namespaces/$NS/pods/hello" \
   -H 'Content-Type: application/merge-patch+json' \
   -d '{"metadata":{"labels":{"chapter":"two"}}}'
 ```
+
+**Code walkthrough.**
+
+1. `-X PATCH` sets the method to `PATCH`, "change part of this object".
+2. The path ends in `/pods/hello`, so it names one pod, not the list.
+3. `Content-Type: application/merge-patch+json` names the patch format.
+4. The body, `{"metadata":{"labels":{"chapter":"two"}}}`, holds only the part to change. The API server merges it into the stored object, and keeps every other field as it was.
+
+Last, the script sends a `DELETE` to the same path. It adds `?gracePeriodSeconds=0`, which asks Kubernetes to remove the pod at once, without giving it time to shut down. Run the whole script:
 
 ```bash
 bash step2/crud.sh
@@ -169,7 +256,15 @@ echo "== listed pods at resourceVersion $rv; watching from there for 15 seconds"
 curl -sSN "$API/api/v1/namespaces/$NS/pods?watch=true&resourceVersion=$rv&timeoutSeconds=15" > "$events" &
 ```
 
-The script then creates, labels and deletes the `hello` pod.
+**Code walkthrough.** From [`step3/watch.sh`](https://github.com/aarora79/k8s-book/blob/main/chapters/02-api-server-with-curl/step3/watch.sh):
+
+1. `rv=$(curl ... | jq -r '.metadata.resourceVersion')` lists the pods and keeps only the list's `resourceVersion`, in a variable called `rv`. `jq -r` prints the value as plain text, without quotes.
+2. The second `curl` starts the watch. The text after `?` in the path holds options, separated by `&`: `watch=true` turns the list into a watch, `resourceVersion=$rv` says where to start, and `timeoutSeconds=15` asks the API server to close the watch after 15 seconds.
+3. `-N` turns off curl's buffering, so each event is written the moment it arrives.
+4. `> "$events"` saves the watch's output to a temporary file instead of printing it.
+5. The `&` at the very end runs the watch in the background, so the script can go on to the next line while the watch keeps listening.
+
+Next, the script creates the `hello` pod, adds a label with a patch, and deletes it, using the same requests as step 2. Then it waits for the watch to finish, and prints each saved event on one line.
 
 ```bash
 bash step3/watch.sh
@@ -205,6 +300,15 @@ echo "$b" | jq '.data.owner = "b"' \
   | jq '{code, reason, message}'
 ```
 
+**Code walkthrough.** From [`step4/conflict.sh`](https://github.com/aarora79/k8s-book/blob/main/chapters/02-api-server-with-curl/step4/conflict.sh). Earlier in the script, both writers read the ConfigMap into the variables `a` and `b`, so they hold the same `resourceVersion`. Writer A has already changed it.
+
+1. `echo "$b"` prints writer B's old copy.
+2. `| jq '.data.owner = "b"'` changes one setting in that copy, and passes the whole changed object on.
+3. `| curl -sS -X PUT "$url" ... -d @-` sends it back as a `PUT`, a full replace. `-d @-` means "read the body from the pipe", the output of the step before.
+4. The copy still carries the old `resourceVersion`, so the API server refuses it. The last jq shows the code, reason and message of the refusal.
+
+The end of the script reads the ConfigMap again and makes the same change on the fresh copy, and that `PUT` succeeds. Run it:
+
 ```bash
 bash step4/conflict.sh
 ```
@@ -230,6 +334,15 @@ Writer B lost, and the fix is always the same: read the object again, make the c
 
 The API server cannot remember every change forever. It keeps recent changes in memory for watches. Ask a watch to start from a point older than that, and it refuses:
 
+From [`step5/gone.sh`](https://github.com/aarora79/k8s-book/blob/main/chapters/02-api-server-with-curl/step5/gone.sh):
+
+```bash
+echo "== watch pods from resourceVersion 1"
+curl -sS "$API/api/v1/namespaces/$NS/pods?watch=true&resourceVersion=1&timeoutSeconds=5" | jq -c '{type, code: .object.code, reason: .object.reason, message: .object.message}'
+```
+
+**Code walkthrough.** This is a watch like step 3, with one change: `resourceVersion=1`, a starting point from long ago. The jq filter shows the event's type, and the code, reason and message inside it. The rest of the script lists the pods again, takes the fresh `resourceVersion`, and starts a second watch from there, which works.
+
 ```bash
 bash step5/gone.sh
 ```
@@ -254,7 +367,22 @@ For a program, that credential usually belongs to a service account.
 
 > **Everyday picture.** A visitor to an office gets a badge at the front desk. The badge names the visitor, expires at the end of the day and opens only some doors. **In Kubernetes,** a service account is an identity for a program, not a person. A token is its badge: a short string that proves the identity and expires. A role is a list of allowed actions, the doors. A role binding links a role to an account.
 
-`step6/direct.sh` reads the API server's address and its certificate authority from your kubeconfig. It creates a service account called `reader`, and a role binding called `reader-view` that links it to `view`, a built-in role that only allows reading. Then it asks for a short-lived token, and sends three requests: one with no token, and two with it:
+[`step6/direct.sh`](https://github.com/aarora79/k8s-book/blob/main/chapters/02-api-server-with-curl/step6/direct.sh) reads the API server's address and its certificate authority from your kubeconfig. It creates a service account called `reader`, and a role binding called `reader-view` that links it to `view`, a built-in role that only allows reading. Then it asks for a short-lived token, and sends three requests: one with no token, and two with it. From [`step6/direct.sh`](https://github.com/aarora79/k8s-book/blob/main/chapters/02-api-server-with-curl/step6/direct.sh), first the address and the certificate authority:
+
+```bash
+server=$(kubectl config view --raw --minify -o jsonpath='{.clusters[0].cluster.server}')
+kubectl config view --raw --minify -o jsonpath='{.clusters[0].cluster.certificate-authority-data}' \
+  | base64 -d > "$work/ca.crt"
+echo "== API server at $server"
+```
+
+**Code walkthrough.**
+
+1. `kubectl config view --raw --minify` prints your kubeconfig. `--minify` keeps only the cluster you are using now, and `--raw` includes the secret parts that kubectl normally hides.
+2. `-o jsonpath='{.clusters[0].cluster.server}'` picks out one field, the API server's address, and the script saves it in `server`.
+3. The second command picks out the certificate authority's certificate. The kubeconfig stores it in base64, a way to write any data as plain letters and digits, so `base64 -d` turns it back into the certificate, and `>` saves it to the file `ca.crt`.
+
+Then the requests with the token:
 
 ```bash
 token=$(kubectl -n "$NS" create token reader --duration=10m)
@@ -263,6 +391,15 @@ echo "== list pods as the reader"
 curl -sS --cacert "$work/ca.crt" -H "Authorization: Bearer $token" \
   "$server/api/v1/namespaces/$NS/pods" | jq '{kind, items: (.items | length)}'
 ```
+
+**Code walkthrough.**
+
+1. `kubectl -n "$NS" create token reader --duration=10m` asks the API server for a token for the `reader` service account that expires after 10 minutes, and saves it in `token`.
+2. `--cacert "$work/ca.crt"` tells curl to trust the API server's certificate only if the saved certificate authority signed it. This is how curl knows it is talking to the real API server.
+3. `-H "Authorization: Bearer $token"` adds the token to the request. "Bearer" means "whoever holds this token is the account it names".
+4. `jq '{kind, items: (.items | length)}'` shows the kind of the answer and counts the pods in it.
+
+The create request is the same, with `-X POST` and `pod.json` as the body. Run the script:
 
 ```bash
 bash step6/direct.sh
