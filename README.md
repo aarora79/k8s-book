@@ -16,6 +16,24 @@ You want to know what happens inside Kubernetes, and you learn best by building.
 
 If you would like a gentler, step-by-step start first, the [archived 13-phase course](https://github.com/aarora79/k8s-100-to-mcp-gateway) goes from zero to a working cluster.
 
+## How the book is laid out
+
+Every chapter follows the same three beats.
+
+1. You build your own small version of one part of Kubernetes, in Go.
+2. You run it on your laptop cluster, right beside the real part, and use the real Kubernetes tools to drive both: kubectl commands and YAML files, the same ones you would use at work. Then you compare what the two did.
+3. You read the real part's source code, to see why it works differently from yours.
+
+So you use real Kubernetes from the very first chapter. Your own version is never a replacement for learning the real one; it is how you come to understand it. When you watch your toy scheduler and the real scheduler place the same pods, you learn what the real one does, and you also learn why.
+
+The chapters fall into three parts.
+
+- Chapters 0 to 6 build the pod pipeline. Chapter 0 sets up the lab and draws a map of Kubernetes. Chapters 1 to 6 then build, one part per chapter, everything that turns "please run this" into a running program: a container runtime, a client for the API server, a controller, a scheduler and a kubelet.
+- Chapters 7 to 10 add what a real application needs: network traffic between pods, your own kinds of objects, checks on every new object, and a way in from outside the cluster. Two of these chapters go one step further. After you build your version, you rebuild it with the tool that real projects use, so you see how much work that tool does for you. Chapter 8 does this with controller-runtime, and chapter 9 with CEL.
+- Chapter 11 is the capstone. You run a real application, MCP Gateway Registry, on the parts you built. Then you run the swap test: you replace your parts with the real ones, one at a time, and check after each swap that the application still works. When the last swap passes, you have shown that your parts do the same job as the real ones.
+
+What the book leaves out is running large real-world applications the standard way: writing Deployments, Services and Helm charts for many programs, and the day-to-day care of a production cluster. The [archived 13-phase course](https://github.com/aarora79/k8s-100-to-mcp-gateway) covers that ground, and after this book you will know what each of those YAML files asks Kubernetes to do.
+
 ## Chapters
 
 | # | Chapter | You build | Status |
@@ -32,8 +50,6 @@ If you would like a gentler, step-by-step start first, the [archived 13-phase co
 | 9 | [An admission webhook](chapters/09-admission-webhook/README.md) | A validating and a mutating webhook, then the same rule in CEL | Planned |
 | 10 | [A tiny gateway](chapters/10-tiny-gateway/README.md) | A Gateway API HTTPRoute controller and reverse proxy | Planned |
 | 11 | [Capstone: MCP Gateway Registry](chapters/11-capstone-mcp-gateway/README.md) | MCP Gateway Registry running on your parts, then the swap test | Planned |
-
-Chapters 1 to 6 build a pod pipeline from your own parts. Chapters 7 to 10 add what a real application needs. Chapter 11 runs a real application on all of it.
 
 The [glossary](GLOSSARY.md) at the end defines every term the book uses, each with an everyday example.
 
