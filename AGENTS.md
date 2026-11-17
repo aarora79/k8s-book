@@ -74,7 +74,7 @@ make clean       # delete the cluster
 - Active voice, and name the actor: "the scheduler writes a Binding", not "a Binding is written".
 - Short words and short sentences.
 - Spell out an acronym the first time a chapter uses it.
-- Bridge every new term for a beginner. The first time a chapter introduces a term, add a quote block that starts with `**Everyday picture.**` (a non-technical example from daily life) and ends with `**In Kubernetes,**` (or `**In Linux,**` for kernel ideas) and says how each part of the example maps to the technical meaning. Chapters 0 to 2 show the pattern. Keep it to three or four sentences and stop the picture where it stops being true.
+- Bridge every new term for a beginner. The first time a chapter introduces a term, add a quote block that starts with `**Everyday picture.**` (a non-technical example from daily life) followed, on its own line in the same quote block, by `**In Kubernetes,**` (or `**In Linux,**` for kernel ideas) and says how each part of the example maps to the technical meaning. Chapters 0 to 2 show the pattern. Keep it to three or four sentences and stop the picture where it stops being true.
 - Add every new term to `GLOSSARY.md`, in alphabetical order, with a one-line definition, its everyday picture and a link to the chapter that introduces it.
 - Give exact versions, numbers and file names.
 

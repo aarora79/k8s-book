@@ -13,7 +13,9 @@ These rules apply to every file in the repo. `make stylecheck` enforces the ones
 - Bridge every new term. The first time a chapter introduces a term, give a quote block with an everyday, non-technical example, then map it to the technical meaning with `**In Kubernetes,**` (or `**In Linux,**` for kernel ideas):
 
   ```text
-  > **Everyday picture.** A thermostat reads the room, compares it with the target and turns the heating on or off. **In Kubernetes,** an object's spec is the target, what runs is the room, and a program that closes the gap in a loop is a controller.
+  > **Everyday picture.** A thermostat reads the room, compares it with the target and turns the heating on or off.
+  >
+  > **In Kubernetes,** an object's spec is the target, what runs is the room, and a program that closes the gap in a loop is a controller.
   ```
 
   Pick an example the reader already knows, keep it to three or four sentences, and make each part map to something real. Do not stretch the picture past the point where it stops being true; say so in the text instead.

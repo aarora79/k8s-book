@@ -460,3 +460,12 @@ blockquote {
   font-size: 14.5px;
   color: $ink-3;
 }
+
+// The two halves of a callout sit in one box, with a small gap between them.
+blockquote p {
+  margin-bottom: 8px;
+}
+
+blockquote p:last-child {
+  margin-bottom: 0;
+}

@@ -23,19 +23,25 @@ Why start with curl? Because every program you write in later chapters talks to 
 
 The API server speaks HTTP, the same language web browsers use to talk to web sites. A program that sends HTTP requests is called a client. So kubectl is an HTTP client, and so is curl.
 
-> **Everyday picture.** At a bank you never walk into the vault. You hand a form through the teller's window, the teller checks it and does the work, and you get a receipt back. **In Kubernetes,** the API server is the window and kubectl is a customer. Each form is an HTTP request. A request has a method, which says what to do: `GET` to read, `POST` to create, `PUT` to replace, `PATCH` to change part of an object, and `DELETE` to remove. It also has a path, which says which object. The receipt is the response: a status code that says how it went, and usually some JSON.
+> **Everyday picture.** At a bank you never walk into the vault. You hand a form through the teller's window, the teller checks it and does the work, and you get a receipt back.
+>
+> **In Kubernetes,** the API server is the window and kubectl is a customer. Each form is an HTTP request. A request has a method, which says what to do: `GET` to read, `POST` to create, `PUT` to replace, `PATCH` to change part of an object, and `DELETE` to remove. It also has a path, which says which object. The receipt is the response: a status code that says how it went, and usually some JSON.
 
 For example, `kubectl get pods -n ch02` sends the request `GET /api/v1/namespaces/ch02/pods`. The API server answers with JSON, and kubectl turns that JSON into the table you see. To watch kubectl do this, add `-v=8` to any kubectl command, and it prints every request and response.
 
 Before the API server does anything, it checks the request.
 
-> **Everyday picture.** At an airport, the passport desk checks who you are, the gate checks that your ticket lets you board this flight, and security checks what you carry. You need all three. **In Kubernetes,** the API server runs the same three gates on every request. Authentication asks who you are. Authorization asks whether you may do this. Admission asks whether the object itself is acceptable. Chapter 9 adds an admission check of your own.
+> **Everyday picture.** At an airport, the passport desk checks who you are, the gate checks that your ticket lets you board this flight, and security checks what you carry. You need all three.
+>
+> **In Kubernetes,** the API server runs the same three gates on every request. Authentication asks who you are. Authorization asks whether you may do this. Admission asks whether the object itself is acceptable. Chapter 9 adds an admission check of your own.
 
 Only after all three gates does the API server store the object in etcd.
 
 Each stored object also carries one field you will see in every step of this chapter.
 
-> **Everyday picture.** A shared online document numbers each save. If you edit from a copy you opened an hour ago, the editor warns you that someone saved since. **In Kubernetes,** that save number is the `resourceVersion`.
+> **Everyday picture.** A shared online document numbers each save. If you edit from a copy you opened an hour ago, the editor warns you that someone saved since.
+>
+> **In Kubernetes,** that save number is the `resourceVersion`.
 
 The API server changes an object's `resourceVersion` on every write. Clients use it in two ways. They use it to ask for every change after a known point, which is step 3. And they send it back with a change, so the API server can refuse a change made from an out-of-date copy, which is step 4.
 
@@ -73,7 +79,9 @@ The API is a tree of plain web addresses, or URLs. Each kind of object lives at 
 
 How does a client find out which kinds exist, and where?
 
-> **Everyday picture.** The board in an office lobby lists which company sits on which floor, so a visitor finds the right door without asking around. **In Kubernetes,** a few special paths, called the discovery endpoints, are that board. They list every kind of object the API server knows, and the path where each one lives.
+> **Everyday picture.** The board in an office lobby lists which company sits on which floor, so a visitor finds the right door without asking around.
+>
+> **In Kubernetes,** a few special paths, called the discovery endpoints, are that board. They list every kind of object the API server knows, and the path where each one lives.
 
 [`step1/explore.sh`](https://github.com/aarora79/k8s-book/blob/main/chapters/02-api-server-with-curl/step1/explore.sh) reads the board. It is the first script in this chapter, so read it slowly: every later script uses the same building blocks. From [`step1/explore.sh`](https://github.com/aarora79/k8s-book/blob/main/chapters/02-api-server-with-curl/step1/explore.sh):
 
@@ -98,7 +106,9 @@ curl -sS "$API/api/v1" | jq '.resources[] | select(.name == "pods") | {name, nam
 
 **How to read a script.** A shell script runs its lines from top to bottom, as if you typed them one by one.
 
-> **Everyday picture.** On a factory line, each worker does one job and hands the piece to the next worker. **In the shell,** the pipe sign `|` is that hand-off: it sends the output of the command on its left into the command on its right.
+> **Everyday picture.** On a factory line, each worker does one job and hands the piece to the next worker.
+>
+> **In the shell,** the pipe sign `|` is that hand-off: it sends the output of the command on its left into the command on its right.
 
 **Code walkthrough.**
 
@@ -244,7 +254,9 @@ Now look at the delete. It does not make the object vanish at once. The API serv
 
 Chapter 0 said every part of Kubernetes watches the API server. This step shows what watching means.
 
-> **Everyday picture.** You can walk to the newsstand each morning, or you can subscribe once and have each new issue delivered. A subscription starts from a given issue number. **In Kubernetes,** a list is the walk to the newsstand, a watch is the subscription, and the `resourceVersion` is the issue number it starts from.
+> **Everyday picture.** You can walk to the newsstand each morning, or you can subscribe once and have each new issue delivered. A subscription starts from a given issue number.
+>
+> **In Kubernetes,** a list is the walk to the newsstand, a watch is the subscription, and the `resourceVersion` is the issue number it starts from.
 
 A list is a plain `GET` that returns every object of one kind, along with the `resourceVersion` of that moment. A watch is a `GET` with `watch=true` added. The API server keeps a watch open, and sends one line of JSON, called an event, each time an object changes. The client starts the watch from the list's `resourceVersion`, so it misses nothing that happened between the list and the watch:
 
@@ -287,7 +299,9 @@ The delete shows up twice. First comes a `MODIFIED` event that sets `deletionTim
 
 Two programs read an object, change it and write it back. Without a check, the second write would erase the first.
 
-> **Everyday picture.** Two clerks copy the same paper form, each makes a change, and each hands theirs back. The office stamps every form with its revision number and rejects any copy whose stamp is out of date: "someone changed this, read the new one first". Nobody locks the form while they work. **In Kubernetes,** that is optimistic concurrency, and the stamp is the `resourceVersion`.
+> **Everyday picture.** Two clerks copy the same paper form, each makes a change, and each hands theirs back. The office stamps every form with its revision number and rejects any copy whose stamp is out of date: "someone changed this, read the new one first". Nobody locks the form while they work.
+>
+> **In Kubernetes,** that is optimistic concurrency, and the stamp is the `resourceVersion`.
 
 Here is how it works. A `PUT` replaces the whole object, and it carries the `resourceVersion` from the copy the writer read. If the object has changed since then, the API server rejects the `PUT` with `409 Conflict`.
 
@@ -330,7 +344,9 @@ Writer B lost, and the fix is always the same: read the object again, make the c
 
 ### Step 5: a watch that is too old
 
-> **Everyday picture.** A newspaper keeps back issues for a few weeks. Ask for one from last year and the office tells you to start a fresh subscription. **In Kubernetes,** that answer is `410 Gone`.
+> **Everyday picture.** A newspaper keeps back issues for a few weeks. Ask for one from last year and the office tells you to start a fresh subscription.
+>
+> **In Kubernetes,** that answer is `410 Gone`.
 
 The API server cannot remember every change forever. It keeps recent changes in memory for watches. Ask a watch to start from a point older than that, and it refuses:
 
@@ -365,7 +381,9 @@ Inside a cluster, nobody uses `kubectl proxy`. Programs talk to the API server d
 
 For a program, that credential usually belongs to a service account.
 
-> **Everyday picture.** A visitor to an office gets a badge at the front desk. The badge names the visitor, expires at the end of the day and opens only some doors. **In Kubernetes,** a service account is an identity for a program, not a person. A token is its badge: a short string that proves the identity and expires. A role is a list of allowed actions, the doors. A role binding links a role to an account.
+> **Everyday picture.** A visitor to an office gets a badge at the front desk. The badge names the visitor, expires at the end of the day and opens only some doors.
+>
+> **In Kubernetes,** a service account is an identity for a program, not a person. A token is its badge: a short string that proves the identity and expires. A role is a list of allowed actions, the doors. A role binding links a role to an account.
 
 [`step6/direct.sh`](https://github.com/aarora79/k8s-book/blob/main/chapters/02-api-server-with-curl/step6/direct.sh) reads the API server's address and its certificate authority from your kubeconfig. It creates a service account called `reader`, and a role binding called `reader-view` that links it to `view`, a built-in role that only allows reading. Then it asks for a short-lived token, and sends three requests: one with no token, and two with it. From [`step6/direct.sh`](https://github.com/aarora79/k8s-book/blob/main/chapters/02-api-server-with-curl/step6/direct.sh), first the address and the certificate authority:
 

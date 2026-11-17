@@ -25,7 +25,9 @@ Read the output line by line. The shell asks for its machine's name, its hostnam
 
 First, two words. A process is one running program; Linux gives each process a number, its process ID or pid. The kernel, as chapter 0 said, is the core of the operating system: every process asks the kernel when it wants to read a file, start another process or use memory.
 
-> **Everyday picture.** Guests in a hotel share one building, one water supply and one power line, but each room has its own number, its own key and its own circuit breaker, and no guest can see into the next room. Nobody builds a new hotel for each guest. **In Linux,** each container is a room. Every container on a node shares the one Linux kernel. The kernel gives each container its own view of the machine, using a feature called namespaces, and its own limits, using a feature called cgroups. This chapter builds both.
+> **Everyday picture.** Guests in a hotel share one building, one water supply and one power line, but each room has its own number, its own key and its own circuit breaker, and no guest can see into the next room. Nobody builds a new hotel for each guest.
+>
+> **In Linux,** each container is a room. Every container on a node shares the one Linux kernel. The kernel gives each container its own view of the machine, using a feature called namespaces, and its own limits, using a feature called cgroups. This chapter builds both.
 
 So a container is not a small virtual machine. It is an ordinary Linux process that the kernel shows a limited view of the machine. This chapter builds that view one piece at a time. In chapter 6, your own kubelet uses this runtime to run pods.
 
@@ -35,7 +37,9 @@ The design follows Liz Rice's talk [Containers From Scratch](https://gotopia.tec
 
 In a real cluster, three programs share the work of starting a container, and they talk through two standards.
 
-> **Everyday picture.** A wall socket follows a standard, so any lamp or kettle with the right plug works in any house. **In Kubernetes,** the Container Runtime Interface (CRI) is the socket between the kubelet and a container runtime such as containerd. The Open Container Initiative (OCI) runtime spec is a second socket, between containerd and a lower-level program called runc. Either side of each socket can be swapped for another program that fits the same standard.
+> **Everyday picture.** A wall socket follows a standard, so any lamp or kettle with the right plug works in any house.
+>
+> **In Kubernetes,** the Container Runtime Interface (CRI) is the socket between the kubelet and a container runtime such as containerd. The Open Container Initiative (OCI) runtime spec is a second socket, between containerd and a lower-level program called runc. Either side of each socket can be swapped for another program that fits the same standard.
 
 Here is the chain. When the kubelet starts a pod, it asks containerd, over the CRI, to start the pod's containers. containerd fetches the container's image (a packaged copy of every file the program needs) and unpacks it into a folder. It then hands that folder, plus a settings file in JSON, to [runc](https://github.com/opencontainers/runc). runc does the work this chapter does by hand. It sets up the namespaces and cgroups, prepares the container's files, and starts the container's first process.
 
@@ -77,7 +81,9 @@ make shell
 
 You do not need to know Go to follow this chapter. The code uses only a handful of Go features, and here they are, so nothing in the listings is a surprise.
 
-> **Everyday picture.** A recipe book has one recipe called "dinner" that says "make the soup, then make the bread", and separate recipe cards for the soup and the bread. **In Go,** each recipe card is a function: a named block of steps. The program always starts at the function called `main`, and `main` calls the other functions in turn.
+> **Everyday picture.** A recipe book has one recipe called "dinner" that says "make the soup, then make the bread", and separate recipe cards for the soup and the bread.
+>
+> **In Go,** each recipe card is a function: a named block of steps. The program always starts at the function called `main`, and `main` calls the other functions in turn.
 
 - `package main` on the first line says "this file is a program you can run".
 - `import` lists the parts of Go's standard library the program borrows. This chapter uses `fmt` to print text, `os` to read the command line and exit, `os/exec` to start other programs, and `syscall` to make system calls, the requests a program sends to the kernel.
@@ -95,7 +101,9 @@ Each listing below is labeled with the file it comes from, and each file name li
 
 The smallest container changes one thing: the hostname, the name a machine calls itself.
 
-> **Everyday picture.** A hotel has one street address, but the number on your door belongs to your room alone, and changing it does not change the building's address. **In Linux,** a namespace is that door number: the kernel gives a process its own copy of one thing the machine normally shares. Linux has several kinds of namespace. The UTS namespace gives a process its own hostname. (UTS is an old Unix name; it stands for "UNIX Time-sharing System".)
+> **Everyday picture.** A hotel has one street address, but the number on your door belongs to your room alone, and changing it does not change the building's address.
+>
+> **In Linux,** a namespace is that door number: the kernel gives a process its own copy of one thing the machine normally shares. Linux has several kinds of namespace. The UTS namespace gives a process its own hostname. (UTS is an old Unix name; it stands for "UNIX Time-sharing System".)
 
 One warning about the word. Kubernetes also has namespaces, such as `ch02` in chapter 2. Those are folders for Kubernetes objects, and they have nothing to do with Linux namespaces.
 
@@ -229,7 +237,9 @@ First, the process numbers. A PID namespace gives the child its own set of pids,
 
 Second, the files. On Linux every file path starts at `/`, the root of the filesystem. The folder tree that starts there is the root filesystem.
 
-> **Everyday picture.** A hotel key opens one room, and to the guest that room is the whole building: they cannot walk into a room they cannot open. **In Linux,** the container's root filesystem is the room. The `chroot` system call (a request a program makes to the kernel) sets which folder a process treats as `/`. After `chroot`, the process cannot even name a file outside that folder. The design notes explain where this picture breaks down.
+> **Everyday picture.** A hotel key opens one room, and to the guest that room is the whole building: they cannot walk into a room they cannot open.
+>
+> **In Linux,** the container's root filesystem is the room. The `chroot` system call (a request a program makes to the kernel) sets which folder a process treats as `/`. After `chroot`, the process cannot even name a file outside that folder. The design notes explain where this picture breaks down.
 
 Here the busybox folder becomes the child's `/`.
 
@@ -294,7 +304,9 @@ Your Go program is process 1. Why did the shell get 6 and not 2? A Go program do
 
 Step 2 has a leak, and to see it you need one more word.
 
-> **Everyday picture.** Plug a USB stick into a laptop and its files appear under one folder; unplug it and they vanish. **In Linux,** attaching a set of files at a folder is called mounting, and the kernel keeps a list of every mount, the mount table. A mount namespace gives a process its own copy of the mount table, so what it attaches stays out of everyone else's list.
+> **Everyday picture.** Plug a USB stick into a laptop and its files appear under one folder; unplug it and they vanish.
+>
+> **In Linux,** attaching a set of files at a folder is called mounting, and the kernel keeps a list of every mount, the mount table. A mount namespace gives a process its own copy of the mount table, so what it attaches stays out of everyone else's list.
 
 Step 2 mounted the fresh `/proc`, but it had no mount namespace. So that mount went into the node's own mount table, and only the `Unmount` line at the end of the program takes it out again. Kill the container before that line runs, and the mount stays behind on the node. "Break it" below shows this.
 
@@ -365,7 +377,9 @@ func mountDev() error {
 
 Namespaces control what a process can see. Control groups, or cgroups, control how much it can use.
 
-> **Everyday picture.** Each hotel room has its own circuit breaker. A guest who runs three heaters at once trips their own breaker and loses power, and the rest of the floor never notices. **In Linux,** a cgroup is that breaker for a group of processes. It caps how much memory and CPU they use and how many processes they start. When a container goes over its memory cap, the kernel kills a process in it.
+> **Everyday picture.** Each hotel room has its own circuit breaker. A guest who runs three heaters at once trips their own breaker and loses power, and the rest of the floor never notices.
+>
+> **In Linux,** a cgroup is that breaker for a group of processes. It caps how much memory and CPU they use and how many processes they start. When a container goes over its memory cap, the kernel kills a process in it.
 
 You work with a cgroup through ordinary files. Each cgroup is a folder under `/sys/fs/cgroup`. You write a limit into one of its files, and you write a pid into its `cgroup.procs` file to put that process in the group. From then on, the kernel holds that process, and every process it starts, to the limits.
 

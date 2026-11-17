@@ -39,7 +39,9 @@ Kubernetes has one hub, the API server. API stands for application programming i
 
 You talk to the API server with kubectl, the Kubernetes command-line tool. When you type `kubectl get pods`, kubectl sends a request to the API server and prints the answer. The other parts of Kubernetes do the same thing, but from inside programs. None of them call each other. They only talk to the API server.
 
-> **Everyday picture.** In a restaurant kitchen, the waiter clips each order ticket to a rail above the counter. The cooks never talk to the waiter or to each other. Each cook reads the rail, takes the tickets for their station and marks them done, and the stack of tickets is the only record of what the kitchen owes. **In Kubernetes,** the API server is the rail, etcd is the stack of tickets it keeps, and each part of Kubernetes is a cook that watches for its own kind of ticket.
+> **Everyday picture.** In a restaurant kitchen, the waiter clips each order ticket to a rail above the counter. The cooks never talk to the waiter or to each other. Each cook reads the rail, takes the tickets for their station and marks them done, and the stack of tickets is the only record of what the kitchen owes.
+>
+> **In Kubernetes,** the API server is the rail, etcd is the stack of tickets it keeps, and each part of Kubernetes is a cook that watches for its own kind of ticket.
 
 ![The map: kubectl sends requests to the API server; the API server alone talks to etcd and calls admission webhooks; controllers, scheduler, kubelet, kube-proxy and gateway all watch the API server.](images/map.svg)
 
@@ -54,7 +56,9 @@ The map shows each part and the chapter where you rebuild it. You meet each one 
 
 ### Every part runs the same loop
 
-> **Everyday picture.** A thermostat holds a target temperature. It reads the room, compares it with the target and turns the heating on or off to close the gap. It does not care how the room got cold, and it keeps checking after the room is warm. **In Kubernetes,** an object is the target (the desired state), what is running now is the room (the actual state), and a program that closes the gap in a loop is a controller.
+> **Everyday picture.** A thermostat holds a target temperature. It reads the room, compares it with the target and turns the heating on or off to close the gap. It does not care how the room got cold, and it keeps checking after the room is warm.
+>
+> **In Kubernetes,** an object is the target (the desired state), what is running now is the room (the actual state), and a program that closes the gap in a loop is a controller.
 
 Every part on the map works like that thermostat. It watches the API server for the objects it cares about. It compares what those objects ask for with what exists. Then it acts to close the gap, and writes what it did back to the API server, where the next part sees it.
 
@@ -92,7 +96,9 @@ You need seven tools. Here is what each one is for, before you install it.
 - kind builds a Kubernetes cluster out of Docker containers. Its name stands for "Kubernetes in Docker".
 - make runs named commands that a project writes down in a file called a Makefile. Macs and Linux machines have it already. When this book says `make lab`, make looks up the `lab` entry in the Makefile and runs the commands listed there.
 
-> **Everyday picture.** A flight simulator gives a pilot a real cockpit, with real instruments and real controls, bolted to the floor instead of a plane. **In Kubernetes,** kind is the simulator. Each node runs the real Kubernetes programs, but the "machine" under each node is a Docker container on your laptop, not a separate computer.
+> **Everyday picture.** A flight simulator gives a pilot a real cockpit, with real instruments and real controls, bolted to the floor instead of a plane.
+>
+> **In Kubernetes,** kind is the simulator. Each node runs the real Kubernetes programs, but the "machine" under each node is a Docker container on your laptop, not a separate computer.
 
 ### Install the tools
 
@@ -174,7 +180,9 @@ kubectl get nodes -w
 
 The `-w` flag tells kubectl to keep watching and print each change. Within about a minute, `lab-worker2` turns `NotReady`. Notice that nothing told the control plane the node had died. So how did it find out?
 
-> **Everyday picture.** A night guard calls the front desk every hour to say all is well. If the desk hears nothing for two hours, it sends someone to look; it does not wait for the guard to report a problem. **In Kubernetes,** the hourly call is a Lease: a small object the kubelet on each node updates on a timer. A controller called the node lifecycle controller watches the Leases, and treats a Lease that stops changing as a node that has died.
+> **Everyday picture.** A night guard calls the front desk every hour to say all is well. If the desk hears nothing for two hours, it sends someone to look; it does not wait for the guard to report a problem.
+>
+> **In Kubernetes,** the hourly call is a Lease: a small object the kubelet on each node updates on a timer. A controller called the node lifecycle controller watches the Leases, and treats a Lease that stops changing as a node that has died.
 
 Each kubelet renews its node's Lease every few seconds. When `lab-worker2` stopped, its Lease stopped changing, and the node lifecycle controller marked the node `NotReady`. You write that renewal yourself in chapter 6.
 
