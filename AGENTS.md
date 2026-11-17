@@ -135,6 +135,7 @@ A chapter is done when `make lab && make check && make test` passes from a fresh
 - Every other page uses `_layouts/book.html`: a sidebar menu (`_includes/sidebar.html`) with every chapter and the glossary, the page content, and a page number with previous and next links (`_includes/book-nav.html`).
 - `_data/toc.yml` is the one source for the reading order. The sidebar, the contents page and the page numbers all read it. When a chapter is written, change its `status` there from `planned` to `written`, and update its row in the README chapter table too (GitHub readers see that table). `GLOSSARY.md` stays last.
 - `index.html` and `contents.html` are site-only pages written in HTML with Liquid turned on in their front matter. Keep chapter text in markdown so it reads on github.com too.
+- The right-hand column is the code panel (`_includes/code-panel.html`, `assets/js/code-panel.js`). Clicking any link that starts with `https://github.com/aarora79/k8s-book/blob/main/` loads that file from the site and shows it there with line numbers, so link code files to GitHub and the panel works with no extra markup. Below 1200px wide the panel slides in over the page.
 - `assets/js/copy-code.js` adds a copy button to the top right of every code block. `assets/js/menu.js` opens the sidebar on narrow screens. `assets/main.scss` holds the site's extra styles.
 
 To preview the site locally with Docker:

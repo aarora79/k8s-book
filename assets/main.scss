@@ -22,6 +22,7 @@ $code-bg: #f3f1e8;
 $sans: Inter, Roboto, -apple-system, "Segoe UI", system-ui, sans-serif;
 $mono: "JetBrains Mono", "Roboto Mono", ui-monospace, Menlo, Consolas, monospace;
 $sidebar-width: 280px;
+$code-panel-width: clamp(380px, 34vw, 680px);
 
 
 // Page text.
@@ -239,6 +240,7 @@ blockquote {
 
 .book-main {
   margin-left: $sidebar-width;
+  margin-right: $code-panel-width;
   padding: 30px 0;
 }
 
@@ -468,4 +470,129 @@ blockquote p {
 
 blockquote p:last-child {
   margin-bottom: 0;
+}
+
+
+// Code panel: the right-hand column that shows a code file when a reader
+// clicks a code link in the text.
+.code-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  width: $code-panel-width;
+  background: $panel;
+  border-left: 1px solid $rule;
+  box-sizing: border-box;
+}
+
+.code-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 16px;
+  border-bottom: 2px solid $yellow;
+}
+
+.code-panel-title {
+  overflow: hidden;
+  font-family: $mono;
+  font-size: 14px;
+  font-weight: 600;
+  color: $teal;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.code-panel-actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: 6px;
+}
+
+.code-panel-button,
+.code-panel-button:visited {
+  padding: 3px 10px;
+  font-family: $sans;
+  font-size: 13px;
+  line-height: 1.6;
+  color: $ink-2;
+  background: $panel;
+  border: 1px solid $rule;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.code-panel-button:hover {
+  color: $teal;
+  background: $teal-soft;
+  text-decoration: none;
+}
+
+.code-panel-body {
+  flex: 1;
+  overflow: auto;
+  background: $code-bg;
+}
+
+.code-panel-body pre {
+  margin: 0;
+  padding: 12px 0;
+  font-size: 13.5px;
+  line-height: 1.6;
+  white-space: pre;
+  background: none;
+  border: none;
+  border-radius: 0;
+  counter-reset: line;
+}
+
+// Line numbers, drawn by CSS so copying the code leaves them out.
+.code-line::before {
+  display: inline-block;
+  width: 3.2em;
+  margin-right: 1em;
+  padding-right: 0.6em;
+  color: $ink-3;
+  text-align: right;
+  border-right: 1px solid $rule;
+  counter-increment: line;
+  content: counter(line);
+  user-select: none;
+}
+
+.code-panel-empty {
+  margin: 0;
+  padding: 24px 20px;
+  font-size: 15px;
+  color: $ink-3;
+}
+
+// The code link whose file is open in the panel.
+a.code-link-active code {
+  background: $yellow-soft;
+  outline: 2px solid $yellow;
+}
+
+// Below 1200px there is no room for three columns. The panel stays hidden
+// and slides in over the page when a reader opens a file.
+@media (max-width: 1200px) {
+  .book-main {
+    margin-right: 0;
+  }
+
+  .code-panel {
+    width: min(640px, 100vw);
+    box-shadow: -12px 0 30px rgba(29, 43, 42, 0.18);
+    transform: translateX(100%);
+    transition: transform 0.2s ease;
+  }
+
+  .code-panel-open .code-panel {
+    transform: translateX(0);
+  }
 }
