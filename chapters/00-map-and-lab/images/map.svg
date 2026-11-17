@@ -3,17 +3,17 @@
   <desc id="desc">The API server is the hub. Only the API server talks to etcd. kubectl sends requests to the API server, the API server calls admission webhooks, and the controllers, scheduler, kubelet, kube-proxy and gateway all watch the API server.</desc>
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
-      <path d="M0,0 L10,5 L0,10 z" fill="#334155"/>
+      <path d="M0,0 L10,5 L0,10 z" fill="#52615f"/>
     </marker>
   </defs>
   <style>
-    text { font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; fill: #0f172a; }
+    text { font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; fill: #1d2b2a; }
     .name { font-size: 18px; font-weight: 600; }
-    .ch { font-size: 14px; fill: #475569; }
-    .note { font-size: 14px; fill: #334155; font-style: italic; }
-    .box { fill: #eef2ff; stroke: #334155; stroke-width: 1.5; }
-    .hub { fill: #dbeafe; stroke: #1e3a8a; stroke-width: 2; }
-    .line { stroke: #334155; stroke-width: 1.5; fill: none; }
+    .ch { font-size: 14px; fill: #52615f; }
+    .note { font-size: 14px; fill: #2b3a39; font-style: italic; }
+    .box { fill: #fffdf5; stroke: #52615f; stroke-width: 1.5; }
+    .hub { fill: #e0f2ef; stroke: #0f766e; stroke-width: 2; }
+    .line { stroke: #52615f; stroke-width: 1.5; fill: none; }
   </style>
   <rect width="900" height="450" fill="#ffffff"/>
 
