@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 330" width="900" height="330" role="img" aria-labelledby="title desc">
+  <title id="title">List, then watch</title>
+  <desc id="desc">A timeline of resourceVersion numbers. Old numbers the API server has forgotten are shaded: starting a watch there gives 410 Gone. The client lists pods and gets the resourceVersion of that moment, then watches from there, and receives one event per change: ADDED 428, MODIFIED 429 and 430, and later DELETED 436.</desc>
+  <defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#52615f"/></marker><marker id="aw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#a3311f"/></marker></defs>
+  <style>
+text { font-family: Inter, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; fill: #1d2b2a; font-size: 14px; }
+.b { font-weight: 700; font-size: 16px; }
+.s { font-size: 13px; fill: #52615f; }
+.n { font-size: 13px; fill: #2b3a39; font-style: italic; }
+.w { fill: #a3311f; font-weight: 700; }
+.t { fill: #0f766e; font-weight: 700; }
+</style>
+  <rect width="900" height="330" fill="#ffffff"/>
+  <rect x="40" y="110" width="190" height="80" rx="4" fill="#eeeeee" stroke="#bbbbbb" stroke-width="1"/>
+  <text x="135" y="132" text-anchor="middle" class="s">forgotten history</text>
+  <text x="135" y="178" text-anchor="middle" class="s">start here: 410 Gone (step 5)</text>
+  <polyline points="40,150 870,150" fill="none" stroke="#52615f" stroke-width="1.5" marker-end="url(#a)"/>
+  <rect x="250" y="110" width="6" height="90" rx="2" fill="#0f766e" stroke="#0f766e" stroke-width="0"/>
+  <text x="253" y="68" text-anchor="middle" class="b">1. list: every pod, plus the</text>
+  <text x="253" y="88" text-anchor="middle" class="s">resourceVersion of that moment</text>
+  <polyline points="256,215 860,215" fill="none" stroke="#52615f" stroke-width="1.5" marker-end="url(#a)"/>
+  <text x="560" y="238" text-anchor="middle" class="b">2. watch from that resourceVersion: one event for each change</text>
+  <circle cx="330" cy="150" r="7" fill="#fff6cc" stroke="#f5c518" stroke-width="2"/>
+  <text x="330" y="130" text-anchor="middle" class="b">428</text>
+  <text x="330" y="180" text-anchor="middle" class="s">ADDED</text>
+  <circle cx="430" cy="150" r="7" fill="#fff6cc" stroke="#f5c518" stroke-width="2"/>
+  <text x="430" y="130" text-anchor="middle" class="b">429</text>
+  <text x="430" y="180" text-anchor="middle" class="s">MODIFIED</text>
+  <circle cx="530" cy="150" r="7" fill="#fff6cc" stroke="#f5c518" stroke-width="2"/>
+  <text x="530" y="130" text-anchor="middle" class="b">430</text>
+  <text x="530" y="180" text-anchor="middle" class="s">MODIFIED</text>
+  <circle cx="640" cy="150" r="7" fill="#fff6cc" stroke="#f5c518" stroke-width="2"/>
+  <text x="640" y="130" text-anchor="middle" class="b">...</text>
+  <text x="640" y="180" text-anchor="middle" class="s">...</text>
+  <circle cx="770" cy="150" r="7" fill="#fff6cc" stroke="#f5c518" stroke-width="2"/>
+  <text x="770" y="130" text-anchor="middle" class="b">436</text>
+  <text x="770" y="180" text-anchor="middle" class="s">DELETED</text>
+  <text x="450" y="290" text-anchor="middle" class="s">Numbers grow on every write. A watch can only start inside the history the API server remembers.</text>
+</svg>

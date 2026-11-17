@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 250" width="900" height="250" role="img" aria-labelledby="title desc">
+  <title id="title">How a real cluster starts a container</title>
+  <desc id="desc">The kubelet asks containerd over the Container Runtime Interface. containerd fetches and unpacks the image, then hands it to runc over the OCI runtime spec. runc creates the namespaces and cgroups and starts the container&#x27;s process. This chapter builds the part runc does.</desc>
+  <defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#52615f"/></marker><marker id="aw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#a3311f"/></marker></defs>
+  <style>
+text { font-family: Inter, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; fill: #1d2b2a; font-size: 14px; }
+.b { font-weight: 700; font-size: 16px; }
+.s { font-size: 13px; fill: #52615f; }
+.n { font-size: 13px; fill: #2b3a39; font-style: italic; }
+.w { fill: #a3311f; font-weight: 700; }
+.t { fill: #0f766e; font-weight: 700; }
+</style>
+  <rect width="900" height="250" fill="#ffffff"/>
+  <rect x="20" y="60" width="155" height="80" rx="8" fill="#fffdf5" stroke="#52615f" stroke-width="1.5"/>
+  <text x="97" y="95" text-anchor="middle" class="b">kubelet</text>
+  <text x="97" y="118" text-anchor="middle" class="s">on every node</text>
+  <rect x="255" y="60" width="155" height="80" rx="8" fill="#fffdf5" stroke="#52615f" stroke-width="1.5"/>
+  <text x="332" y="95" text-anchor="middle" class="b">containerd</text>
+  <text x="332" y="118" text-anchor="middle" class="s">fetches the image</text>
+  <rect x="490" y="60" width="155" height="80" rx="8" fill="#fff6cc" stroke="#f5c518" stroke-width="2"/>
+  <text x="567" y="95" text-anchor="middle" class="b">runc</text>
+  <text x="567" y="118" text-anchor="middle" class="s">namespaces, cgroups</text>
+  <rect x="725" y="60" width="155" height="80" rx="8" fill="#e0f2ef" stroke="#0f766e" stroke-width="1.5"/>
+  <text x="802" y="95" text-anchor="middle" class="b">the container</text>
+  <text x="802" y="118" text-anchor="middle" class="s">your program runs</text>
+  <polyline points="175,100 253,100" fill="none" stroke="#52615f" stroke-width="1.5" marker-end="url(#a)"/>
+  <text x="215.0" y="90" text-anchor="middle" class="n">CRI</text>
+  <polyline points="410,100 488,100" fill="none" stroke="#52615f" stroke-width="1.5" marker-end="url(#a)"/>
+  <text x="450.0" y="90" text-anchor="middle" class="n">OCI spec</text>
+  <polyline points="645,100 723,100" fill="none" stroke="#52615f" stroke-width="1.5" marker-end="url(#a)"/>
+  <text x="685.0" y="90" text-anchor="middle" class="n">starts</text>
+  <text x="567" y="190" text-anchor="middle" class="t">this chapter builds this part</text>
+  <polyline points="567,174 567,144" fill="none" stroke="#52615f" stroke-width="1.5" marker-end="url(#a)"/>
+</svg>

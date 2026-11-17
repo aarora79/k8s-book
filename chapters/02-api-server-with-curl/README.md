@@ -23,6 +23,10 @@ Why start with curl? Because every program you write in later chapters talks to 
 
 ## What the real one does
 
+Here is the path every request in this chapter takes. The rest of this section, and the set up below, explain each box.
+
+![On your laptop, curl sends a plain request to kubectl proxy on port 8001, which adds your credentials and passes it on over HTTPS. In step 6, curl skips the proxy and sends HTTPS with a token. Inside the cluster, the API server runs three gates, authentication, authorization and admission, then stores the object in etcd.](images/request-path.svg)
+
 The API server speaks HTTP (HyperText Transfer Protocol), the same language web browsers use to talk to web sites. As chapter 0 said, a program that sends requests is a client. So kubectl is an HTTP client, and so is curl.
 
 > **Everyday picture.** At a bank you never walk into the vault. You hand a form through the teller's window, the teller checks it and does the work, and you get a receipt back.
@@ -37,7 +41,7 @@ Before the API server does anything, it checks the request.
 
 > **Everyday picture.** At an airport, the passport desk checks who you are, the gate checks that your ticket lets you board this flight, and security checks what you carry. You need all three.
 >
-> **In Kubernetes,** the API server runs the same three gates on every request that changes something. Authentication asks who you are. Authorization asks whether you may do this. Admission asks whether the object itself is acceptable. Chapter 9 adds an admission check of your own.
+> **In Kubernetes,** the API server runs the same three gates on every request that changes something. Authentication asks who you are. Authorization asks whether you may do this. Admission asks whether the object itself is acceptable. In the picture, they are the three white boxes inside the API server. Chapter 9 adds an admission check of your own.
 
 Only after all three gates does the API server store the object in etcd.
 
@@ -68,7 +72,7 @@ You need the lab from [chapter 0](../00-map-and-lab/README.md). You also need cu
 
 The API server only answers requests that prove who sent them. kubectl finds your proof in a file called the kubeconfig, which kind wrote when it built the cluster. The kubeconfig holds the API server's address and your credentials: the secret that proves who you are.
 
-For steps 1 to 5, a helper takes care of the credentials. `kubectl proxy` is a small go-between that runs on your laptop. It listens for requests on port 8001 of your laptop, adds your credentials to each one, and passes it on to the API server. So curl can send requests with no credentials at all, and you can ignore credentials until step 6.
+For steps 1 to 5, a helper takes care of the credentials: the yellow box in the picture. `kubectl proxy` is a small go-between that runs on your laptop. It listens for requests on port 8001 of your laptop, adds your credentials to each one, and passes it on to the API server. So curl can send requests with no credentials at all, and you can ignore credentials until step 6.
 
 Open a second terminal window, move into the book's folder, and start the proxy there:
 
@@ -269,7 +273,11 @@ Now look at the delete. Even with `gracePeriodSeconds=0`, the object does not va
 
 ### Step 3: watch
 
-Chapter 0 said every part of Kubernetes watches the API server. This step shows what watching means.
+Chapter 0 said every part of Kubernetes watches the API server. This step shows what watching means, on a timeline of `resourceVersion` numbers:
+
+![A timeline of resourceVersion numbers. Old numbers the API server has forgotten are shaded grey, and starting a watch there gives 410 Gone. The client lists the pods and gets the resourceVersion of that moment, then watches from there, and gets one event per change: ADDED 428, MODIFIED 429 and 430, and later DELETED 436.](images/watch.svg)
+
+Read it from left to right. Every write moves the number up. First the client lists the pods, at the teal bar. Then it watches from that point, and the API server sends one event, a yellow dot, for each change after it. The grey part on the left is history the API server has forgotten; step 5 tries to start a watch there.
 
 > **Everyday picture.** You can walk to the newsstand each morning, or you can subscribe once and have each new issue delivered. A subscription starts from a given issue number.
 >
@@ -316,7 +324,11 @@ The delete shows up twice. First comes a `MODIFIED` event that sets `deletionTim
 
 ### Step 4: two writers, one conflict
 
-Concurrency means several programs working on the same thing at the same time. Here, two programs read an object, change it and write it back. Without a check, the second write would erase the first.
+Concurrency means several programs working on the same thing at the same time. Here, two programs read an object, change it and write it back. Without a check, the second write would erase the first. Here is what happens instead, with time running down the page:
+
+![Writer A and writer B both read the ConfigMap at resourceVersion 434. A replaces it first, and it becomes 435. B replaces it from its copy at 434 and gets 409 Conflict. B reads again, gets 435, makes its change again, and it becomes 436.](images/conflict.svg)
+
+Both writers read the same version. A writes first and wins. B writes from its old copy and gets refused, in red. So B reads again and writes again, and this time it works.
 
 > **Everyday picture.** Two clerks copy the same paper form, each makes a change, and each hands theirs back. The office stamps every form with its revision number and rejects any copy whose stamp is out of date: "someone changed this, read the new one first". Nobody locks the form while they work.
 >
@@ -369,7 +381,7 @@ Writer B lost, and the fix is always the same: read the object again, make the c
 >
 > **In Kubernetes,** that answer is `410 Gone`.
 
-The API server cannot remember every change forever. It keeps recent changes in memory for watches. Ask a watch to start from a point older than that, and it refuses.
+The API server cannot remember every change forever. It keeps recent changes in memory for watches: the white part of the timeline in step 3. Ask a watch to start from a point older than that, in the grey part, and it refuses.
 
 From [`step5/gone.sh`](https://github.com/aarora79/k8s-book/blob/main/chapters/02-api-server-with-curl/step5/gone.sh):
 
@@ -400,7 +412,7 @@ When does this happen in real life? A program loses its connection for a while, 
 
 ### Step 6: no proxy
 
-Inside a cluster, nobody uses `kubectl proxy`. Programs talk to the API server directly, over TLS (Transport Layer Security), the same encryption that protects web sites whose address starts with `https`. With TLS, the API server first proves who it is with a certificate: a file that names a server, signed by a certificate authority, a trusted signer that vouches for it. Then the program proves who it is, by sending a credential.
+Inside a cluster, nobody uses `kubectl proxy`. Programs talk to the API server directly, along the lower arrow in the picture at the start of this chapter, over TLS (Transport Layer Security), the same encryption that protects web sites whose address starts with `https`. With TLS, the API server first proves who it is with a certificate: a file that names a server, signed by a certificate authority, a trusted signer that vouches for it. Then the program proves who it is, by sending a credential.
 
 For a program, that credential usually belongs to a service account.
 

@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 560" width="900" height="560" role="img" aria-labelledby="title desc">
+  <title id="title">Two writers, one conflict</title>
+  <desc id="desc">Writer A and writer B both read the ConfigMap at resourceVersion 434. A replaces it first, and it becomes 435. B replaces it with its copy at 434 and gets 409 Conflict. B reads again, gets 435, makes its change again and replaces it, and it becomes 436.</desc>
+  <defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#52615f"/></marker><marker id="aw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#a3311f"/></marker></defs>
+  <style>
+text { font-family: Inter, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; fill: #1d2b2a; font-size: 14px; }
+.b { font-weight: 700; font-size: 16px; }
+.s { font-size: 13px; fill: #52615f; }
+.n { font-size: 13px; fill: #2b3a39; font-style: italic; }
+.w { fill: #a3311f; font-weight: 700; }
+.t { fill: #0f766e; font-weight: 700; }
+</style>
+  <rect width="900" height="560" fill="#ffffff"/>
+  <rect x="20" y="15" width="260" height="46" rx="8" fill="#fffdf5" stroke="#52615f" stroke-width="1.5"/>
+  <text x="150" y="44" text-anchor="middle" class="b">writer A</text>
+  <polyline points="150,61 150,535" fill="none" stroke="#bbbbbb" stroke-width="1.5" stroke-dasharray="4 5"/>
+  <rect x="320" y="15" width="260" height="46" rx="8" fill="#e0f2ef" stroke="#0f766e" stroke-width="2"/>
+  <text x="450" y="44" text-anchor="middle" class="b">API server: ConfigMap settings</text>
+  <polyline points="450,61 450,535" fill="none" stroke="#bbbbbb" stroke-width="1.5" stroke-dasharray="4 5"/>
+  <rect x="620" y="15" width="260" height="46" rx="8" fill="#fffdf5" stroke="#52615f" stroke-width="1.5"/>
+  <text x="750" y="44" text-anchor="middle" class="b">writer B</text>
+  <polyline points="750,61 750,535" fill="none" stroke="#bbbbbb" stroke-width="1.5" stroke-dasharray="4 5"/>
+  <polyline points="150,95 445,95" fill="none" stroke="#52615f" stroke-width="1.5" marker-end="url(#a)"/>
+  <text x="297.5" y="87" text-anchor="middle">read: version 434</text>
+  <polyline points="750,140 455,140" fill="none" stroke="#52615f" stroke-width="1.5" marker-end="url(#a)"/>
+  <text x="602.5" y="132" text-anchor="middle">read: version 434</text>
+  <polyline points="150,195 445,195" fill="none" stroke="#52615f" stroke-width="1.5" marker-end="url(#a)"/>
+  <text x="297.5" y="187" text-anchor="middle">PUT owner=a, from version 434</text>
+  <polyline points="450,230 155,230" fill="none" stroke="#52615f" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#a)"/>
+  <text x="302.5" y="222" text-anchor="middle">OK, now version 435</text>
+  <polyline points="750,285 455,285" fill="none" stroke="#52615f" stroke-width="1.5" marker-end="url(#a)"/>
+  <text x="602.5" y="277" text-anchor="middle">PUT owner=b, from version 434</text>
+  <polyline points="450,320 745,320" fill="none" stroke="#a3311f" stroke-width="1.5" marker-end="url(#aw)"/>
+  <text x="597.5" y="312" text-anchor="middle" class="w">409 Conflict: your copy is old</text>
+  <polyline points="750,375 455,375" fill="none" stroke="#52615f" stroke-width="1.5" marker-end="url(#a)"/>
+  <text x="602.5" y="367" text-anchor="middle">read again: version 435</text>
+  <polyline points="750,430 455,430" fill="none" stroke="#52615f" stroke-width="1.5" marker-end="url(#a)"/>
+  <text x="602.5" y="422" text-anchor="middle">PUT owner=b, from version 435</text>
+  <polyline points="450,465 745,465" fill="none" stroke="#52615f" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#a)"/>
+  <text x="597.5" y="457" text-anchor="middle">OK, now version 436</text>
+  <text x="450" y="515" text-anchor="middle" class="s">time runs down the page</text>
+</svg>

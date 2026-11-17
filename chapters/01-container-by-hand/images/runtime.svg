@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" width="900" height="600" role="img" aria-labelledby="title desc">
+  <title id="title">How your runtime starts a container</title>
+  <desc id="desc">You type step4 run. The parent creates a cgroup, then starts a copy of itself as the child in new namespaces. The child joins the cgroup, sets the hostname, makes mounts private, changes its root, mounts /proc and /dev, then runs your command. The exit code comes back to the parent.</desc>
+  <defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#52615f"/></marker><marker id="aw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#a3311f"/></marker></defs>
+  <style>
+text { font-family: Inter, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; fill: #1d2b2a; font-size: 14px; }
+.b { font-weight: 700; font-size: 16px; }
+.s { font-size: 13px; fill: #52615f; }
+.n { font-size: 13px; fill: #2b3a39; font-style: italic; }
+.w { fill: #a3311f; font-weight: 700; }
+.t { fill: #0f766e; font-weight: 700; }
+</style>
+  <rect width="900" height="600" fill="#ffffff"/>
+  <rect x="250" y="15" width="400" height="46" rx="8" fill="#fff6cc" stroke="#f5c518" stroke-width="1.5"/>
+  <text x="450" y="44" text-anchor="middle">you type:  step4 run /root/rootfs /bin/sh</text>
+  <polyline points="450,61 450,85 230,85 230,103" fill="none" stroke="#52615f" stroke-width="1.5" marker-end="url(#a)"/>
+  <rect x="30" y="105" width="400" height="150" rx="8" fill="#fffdf5" stroke="#52615f" stroke-width="1.5"/>
+  <text x="230" y="132" text-anchor="middle" class="b">the parent:  run</text>
+  <text x="48" y="160" text-anchor="start">1. create a cgroup and write its limits</text>
+  <text x="412" y="160" text-anchor="end" class="s">step 4</text>
+  <text x="48" y="182" text-anchor="start">2. start a copy of this program as</text>
+  <text x="412" y="182" text-anchor="end" class="s">step 1</text>
+  <text x="48" y="204" text-anchor="start">    the child, asking for new namespaces:</text>
+  <text x="48" y="226" text-anchor="start">    UTS (1), PID (2) and mount (3)</text>
+  <polyline points="430,180 468,180" fill="none" stroke="#52615f" stroke-width="1.5" marker-end="url(#a)"/>
+  <text x="449" y="172" text-anchor="middle" class="n">clone</text>
+  <rect x="470" y="105" width="400" height="300" rx="8" fill="#e0f2ef" stroke="#0f766e" stroke-width="2"/>
+  <text x="670" y="132" text-anchor="middle" class="b">the child:  child</text>
+  <text x="670" y="152" text-anchor="middle" class="s">already inside the new namespaces</text>
+  <text x="490" y="182" text-anchor="start">1. join the cgroup</text>
+  <text x="852" y="182" text-anchor="end" class="s">step 4</text>
+  <text x="490" y="212" text-anchor="start">2. set the hostname to container</text>
+  <text x="852" y="212" text-anchor="end" class="s">step 1</text>
+  <text x="490" y="242" text-anchor="start">3. mark every mount private</text>
+  <text x="852" y="242" text-anchor="end" class="s">step 3</text>
+  <text x="490" y="272" text-anchor="start">4. chroot into /root/rootfs</text>
+  <text x="852" y="272" text-anchor="end" class="s">step 2</text>
+  <text x="490" y="302" text-anchor="start">5. mount a fresh /proc</text>
+  <text x="852" y="302" text-anchor="end" class="s">step 2</text>
+  <text x="490" y="332" text-anchor="start">6. mount its own /dev</text>
+  <text x="852" y="332" text-anchor="end" class="s">step 3</text>
+  <text x="490" y="362" text-anchor="start">7. exec your command</text>
+  <text x="852" y="362" text-anchor="end" class="s">step 1</text>
+  <polyline points="670,405 670,438" fill="none" stroke="#52615f" stroke-width="1.5" marker-end="url(#a)"/>
+  <rect x="470" y="440" width="400" height="62" rx="8" fill="#fffdf5" stroke="#52615f" stroke-width="1.5"/>
+  <text x="670" y="466" text-anchor="middle" class="b">your command runs: /bin/sh</text>
+  <text x="670" y="488" text-anchor="middle" class="s">pid 1 inside the container</text>
+  <polyline points="470,471 230,471 230,257" fill="none" stroke="#52615f" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#a)"/>
+  <text x="250" y="462" text-anchor="start" class="n">exit code passed back (exitWith)</text>
+  <text x="450" y="560" text-anchor="middle" class="s">Each line names the step of this chapter that adds it.</text>
+  <text x="450" y="582" text-anchor="middle" class="s">Step 1 builds the bare frame. Steps 2, 3 and 4 add the rest.</text>
+</svg>

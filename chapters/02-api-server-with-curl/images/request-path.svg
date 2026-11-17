@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 400" width="900" height="400" role="img" aria-labelledby="title desc">
+  <title id="title">The path of a request</title>
+  <desc id="desc">On your laptop, curl sends a plain request to kubectl proxy on port 8001, which adds your credentials and passes it to the API server over HTTPS. In step 6, curl skips the proxy and sends HTTPS with a token. The API server runs three gates, authentication, authorization and admission, then stores the object in etcd.</desc>
+  <defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#52615f"/></marker><marker id="aw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#a3311f"/></marker></defs>
+  <style>
+text { font-family: Inter, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; fill: #1d2b2a; font-size: 14px; }
+.b { font-weight: 700; font-size: 16px; }
+.s { font-size: 13px; fill: #52615f; }
+.n { font-size: 13px; fill: #2b3a39; font-style: italic; }
+.w { fill: #a3311f; font-weight: 700; }
+.t { fill: #0f766e; font-weight: 700; }
+</style>
+  <rect width="900" height="400" fill="#ffffff"/>
+  <rect x="15" y="15" width="345" height="370" rx="12" fill="#ffffff" stroke="#52615f" stroke-width="1.2" stroke-dasharray="6 5"/>
+  <text x="30" y="40" text-anchor="start" class="b">your laptop</text>
+  <rect x="390" y="15" width="495" height="370" rx="12" fill="#ffffff" stroke="#52615f" stroke-width="1.2" stroke-dasharray="6 5"/>
+  <text x="405" y="40" text-anchor="start" class="b">the cluster</text>
+  <rect x="40" y="90" width="120" height="56" rx="8" fill="#fffdf5" stroke="#52615f" stroke-width="1.5"/>
+  <text x="100" y="123" text-anchor="middle" class="b">curl</text>
+  <rect x="205" y="70" width="135" height="96" rx="8" fill="#fff6cc" stroke="#f5c518" stroke-width="1.5"/>
+  <text x="272" y="98" text-anchor="middle" class="b">kubectl proxy</text>
+  <text x="272" y="120" text-anchor="middle" class="s">port 8001</text>
+  <text x="272" y="140" text-anchor="middle" class="s">adds credentials</text>
+  <polyline points="160,118 203,118" fill="none" stroke="#52615f" stroke-width="1.5" marker-end="url(#a)"/>
+  <text x="182" y="108" text-anchor="middle" class="n">plain</text>
+  <rect x="420" y="60" width="270" height="300" rx="8" fill="#e0f2ef" stroke="#0f766e" stroke-width="2"/>
+  <text x="555" y="88" text-anchor="middle" class="b">API server</text>
+  <rect x="440" y="108" width="230" height="50" rx="6" fill="#ffffff" stroke="#0f766e" stroke-width="1"/>
+  <text x="555" y="130" text-anchor="middle" class="b">1. authentication</text>
+  <text x="555" y="148" text-anchor="middle" class="s">who are you?</text>
+  <rect x="440" y="170" width="230" height="50" rx="6" fill="#ffffff" stroke="#0f766e" stroke-width="1"/>
+  <text x="555" y="192" text-anchor="middle" class="b">2. authorization</text>
+  <text x="555" y="210" text-anchor="middle" class="s">may you do this?</text>
+  <rect x="440" y="232" width="230" height="50" rx="6" fill="#ffffff" stroke="#0f766e" stroke-width="1"/>
+  <text x="555" y="254" text-anchor="middle" class="b">3. admission</text>
+  <text x="555" y="272" text-anchor="middle" class="s">is the object OK?</text>
+  <polyline points="340,118 438,118" fill="none" stroke="#52615f" stroke-width="1.5" marker-end="url(#a)"/>
+  <text x="389" y="108" text-anchor="middle" class="n">HTTPS</text>
+  <text x="272" y="188" text-anchor="middle" class="s">used in steps 1 to 5</text>
+  <polyline points="100,146 100,320 418,320" fill="none" stroke="#52615f" stroke-width="1.5" marker-end="url(#a)"/>
+  <text x="259" y="310" text-anchor="middle" class="n">HTTPS + a token, step 6</text>
+  <rect x="730" y="180" width="130" height="60" rx="8" fill="#fffdf5" stroke="#52615f" stroke-width="1.5"/>
+  <text x="795" y="215" text-anchor="middle" class="b">etcd</text>
+  <polyline points="690,210 728,210" fill="none" stroke="#52615f" stroke-width="1.5" marker-end="url(#a)"/>
+  <text x="709" y="200" text-anchor="middle" class="n">store</text>
+  <text x="555" y="345" text-anchor="middle" class="s">reads skip admission</text>
+</svg>

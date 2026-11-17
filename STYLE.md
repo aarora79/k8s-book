@@ -24,6 +24,7 @@ These rules apply to every file in the repo. `make stylecheck` enforces the ones
 
 ## Diagrams
 
+- Put a diagram early: at the start of a chapter or section, before the long explanation, not after it. Then anchor the text to it: point into the picture ("the teal boxes", "follow the arrows", "the grey part of the timeline") as you explain each piece. Good candidates are the overall shape of what the chapter builds, the flow of a program, a chain of components, a timeline, and two programs talking over time.
 - Draw every diagram as an SVG file in the chapter's `images/` folder and embed it with `![alt text](images/name.svg)`. No ASCII art diagrams in code blocks.
 - Give the SVG a white background, a `<title>` and a `<desc>`, and write alt text that says what the diagram shows.
 

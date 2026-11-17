@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 420" width="900" height="420" role="img" aria-labelledby="title desc">
+  <title id="title">What a container is</title>
+  <desc id="desc">Three containers sit on one shared Linux kernel. Each has its own hostname, process numbers, files and list of mounts, given by namespaces, and its own limits, given by a cgroup.</desc>
+  <defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#52615f"/></marker><marker id="aw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#a3311f"/></marker></defs>
+  <style>
+text { font-family: Inter, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; fill: #1d2b2a; font-size: 14px; }
+.b { font-weight: 700; font-size: 16px; }
+.s { font-size: 13px; fill: #52615f; }
+.n { font-size: 13px; fill: #2b3a39; font-style: italic; }
+.w { fill: #a3311f; font-weight: 700; }
+.t { fill: #0f766e; font-weight: 700; }
+</style>
+  <rect width="900" height="420" fill="#ffffff"/>
+  <rect x="40" y="20" width="250" height="250" rx="8" fill="#fffdf5" stroke="#52615f" stroke-width="1.5"/>
+  <text x="165" y="48" text-anchor="middle" class="b">container 1</text>
+  <rect x="55" y="64" width="220" height="30" rx="5" fill="#e0f2ef" stroke="#0f766e" stroke-width="1"/>
+  <text x="165" y="84" text-anchor="middle">its own hostname</text>
+  <rect x="55" y="102" width="220" height="30" rx="5" fill="#e0f2ef" stroke="#0f766e" stroke-width="1"/>
+  <text x="165" y="122" text-anchor="middle">its own process numbers</text>
+  <rect x="55" y="140" width="220" height="30" rx="5" fill="#e0f2ef" stroke="#0f766e" stroke-width="1"/>
+  <text x="165" y="160" text-anchor="middle">its own files</text>
+  <rect x="55" y="178" width="220" height="30" rx="5" fill="#e0f2ef" stroke="#0f766e" stroke-width="1"/>
+  <text x="165" y="198" text-anchor="middle">its own list of mounts</text>
+  <rect x="55" y="222" width="220" height="34" rx="5" fill="#fff6cc" stroke="#f5c518" stroke-width="1.5"/>
+  <text x="165" y="244" text-anchor="middle">limits: memory, processes</text>
+  <polyline points="165,270 165,298" fill="none" stroke="#52615f" stroke-width="1.5" marker-end="url(#a)"/>
+  <rect x="325" y="20" width="250" height="250" rx="8" fill="#fffdf5" stroke="#52615f" stroke-width="1.5"/>
+  <text x="450" y="48" text-anchor="middle" class="b">container 2</text>
+  <rect x="340" y="64" width="220" height="30" rx="5" fill="#e0f2ef" stroke="#0f766e" stroke-width="1"/>
+  <text x="450" y="84" text-anchor="middle">its own hostname</text>
+  <rect x="340" y="102" width="220" height="30" rx="5" fill="#e0f2ef" stroke="#0f766e" stroke-width="1"/>
+  <text x="450" y="122" text-anchor="middle">its own process numbers</text>
+  <rect x="340" y="140" width="220" height="30" rx="5" fill="#e0f2ef" stroke="#0f766e" stroke-width="1"/>
+  <text x="450" y="160" text-anchor="middle">its own files</text>
+  <rect x="340" y="178" width="220" height="30" rx="5" fill="#e0f2ef" stroke="#0f766e" stroke-width="1"/>
+  <text x="450" y="198" text-anchor="middle">its own list of mounts</text>
+  <rect x="340" y="222" width="220" height="34" rx="5" fill="#fff6cc" stroke="#f5c518" stroke-width="1.5"/>
+  <text x="450" y="244" text-anchor="middle">limits: memory, processes</text>
+  <polyline points="450,270 450,298" fill="none" stroke="#52615f" stroke-width="1.5" marker-end="url(#a)"/>
+  <rect x="610" y="20" width="250" height="250" rx="8" fill="#fffdf5" stroke="#52615f" stroke-width="1.5"/>
+  <text x="735" y="48" text-anchor="middle" class="b">container 3</text>
+  <rect x="625" y="64" width="220" height="30" rx="5" fill="#e0f2ef" stroke="#0f766e" stroke-width="1"/>
+  <text x="735" y="84" text-anchor="middle">its own hostname</text>
+  <rect x="625" y="102" width="220" height="30" rx="5" fill="#e0f2ef" stroke="#0f766e" stroke-width="1"/>
+  <text x="735" y="122" text-anchor="middle">its own process numbers</text>
+  <rect x="625" y="140" width="220" height="30" rx="5" fill="#e0f2ef" stroke="#0f766e" stroke-width="1"/>
+  <text x="735" y="160" text-anchor="middle">its own files</text>
+  <rect x="625" y="178" width="220" height="30" rx="5" fill="#e0f2ef" stroke="#0f766e" stroke-width="1"/>
+  <text x="735" y="198" text-anchor="middle">its own list of mounts</text>
+  <rect x="625" y="222" width="220" height="34" rx="5" fill="#fff6cc" stroke="#f5c518" stroke-width="1.5"/>
+  <text x="735" y="244" text-anchor="middle">limits: memory, processes</text>
+  <polyline points="735,270 735,298" fill="none" stroke="#52615f" stroke-width="1.5" marker-end="url(#a)"/>
+  <rect x="40" y="300" width="820" height="52" rx="8" fill="#e0f2ef" stroke="#0f766e" stroke-width="2"/>
+  <text x="450" y="332" text-anchor="middle" class="b">one Linux kernel, shared by every container on the node</text>
+  <rect x="60" y="372" width="18" height="18" rx="3" fill="#e0f2ef" stroke="#0f766e" stroke-width="1"/>
+  <text x="86" y="386" text-anchor="start">namespaces: what the container can see</text>
+  <rect x="470" y="372" width="18" height="18" rx="3" fill="#fff6cc" stroke="#f5c518" stroke-width="1.5"/>
+  <text x="496" y="386" text-anchor="start">cgroup: how much the container may use</text>
+</svg>

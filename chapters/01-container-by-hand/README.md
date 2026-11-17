@@ -31,11 +31,17 @@ Read it line by line.
 - `ps` lists the running programs, and sees only three. The first one, `/proc/self/exe child ...`, is the runtime itself; step 1 explains that name too.
 - The last command asks the shell to start 40 copies of `sleep 1`, a program that just waits for one second. The shell refuses with "can't fork": fork is how Linux starts a new process (step 1 explains it), and "Resource temporarily unavailable" is the kernel saying no, because your runtime set a limit.
 
+Here is what you are building, in one picture. Keep it in mind for the rest of the chapter.
+
+![Three containers sit on one shared Linux kernel. Each has its own hostname, process numbers, files and list of mounts, shown in teal, and its own limits on memory and processes, shown in yellow.](images/container.svg)
+
+Three containers sit on top of one Linux kernel. Each container has its own hostname, its own process numbers, its own files and its own list of mounts: the teal boxes. Each one also has its own limits: the yellow box. The rest of this section names those two kinds of box.
+
 First, two words. A process is one running program. Linux gives each process a number, its process ID, or pid. And as chapter 0 said, the kernel is the core of the operating system: every process asks the kernel when it wants to read a file, start another process or use memory.
 
 > **Everyday picture.** Guests in a hotel share one building, one water supply and one power line, but each room has its own number, its own key and its own circuit breaker, and no guest can see into the next room. Nobody builds a new hotel for each guest.
 >
-> **In Linux,** each container is a room. Every container on a node shares the one Linux kernel. The kernel gives each container its own view of the computer, using a feature called namespaces, and its own limits, using a feature called control groups, or cgroups. This chapter builds both.
+> **In Linux,** each container is a room. Every container on a node shares the one Linux kernel. The kernel gives each container its own view of the computer, using a feature called namespaces, and its own limits, using a feature called control groups, or cgroups. In the picture, the teal boxes are the container's namespaces, and the yellow box is its cgroup. This chapter builds both.
 
 So a container is not a small virtual machine. It is an ordinary Linux process that the kernel shows a limited view of the computer. This chapter builds that view one piece at a time. In chapter 6, your own kubelet uses this runtime to run pods.
 
@@ -43,13 +49,15 @@ The design follows Liz Rice's talk [Containers From Scratch](https://gotopia.tec
 
 ## What the real one does
 
-In a real cluster, three programs share the work of starting a container, and they talk to each other through two standards. (A standard, sometimes called a spec, short for specification, is a written agreement about how two programs talk.)
+In a real cluster, three programs share the work of starting a container, and they talk to each other through two standards. (A standard, sometimes called a spec, short for specification, is a written agreement about how two programs talk.) Here is the chain, from left to right:
+
+![The kubelet asks containerd over the CRI. containerd fetches the image and hands it to runc over the OCI spec. runc sets up namespaces and cgroups and starts the container. This chapter builds the runc part, highlighted in yellow.](images/chain.svg)
 
 > **Everyday picture.** A wall socket follows a standard, so any lamp or kettle with the right plug works in any house.
 >
 > **In Kubernetes,** the Container Runtime Interface (CRI) is the socket between the kubelet and a container runtime such as containerd. The Open Container Initiative (OCI) runtime spec is a second socket, between containerd and a smaller program called runc. Either side of each socket can be swapped for another program that fits the same standard.
 
-Here is the chain, one step at a time.
+Now follow the arrows in the picture, one step at a time.
 
 1. The kubelet sees a pod assigned to its node. Over the CRI, it asks containerd to start the pod's containers.
 2. containerd downloads the container's image: a packaged copy of every file the program needs.
@@ -133,6 +141,14 @@ Each listing below is labeled with the file it comes from, and each file name li
 
 ## Build it
 
+Here is the whole runtime you are about to build, in one picture. Come back to it at each step to see where the new code fits.
+
+![The runtime in two halves. The parent, run, creates a cgroup and starts a copy of itself as the child in new namespaces. The child joins the cgroup, sets the hostname, makes mounts private, changes its root, mounts /proc and /dev, then runs your command, which is pid 1 in the container. The exit code goes back to the parent. Each line is labeled with the step that adds it.](images/runtime.svg)
+
+Read it from the top. You type the command. The parent, on the left, does the work that must happen outside the container, then starts the child. The child, on the right, is already inside the new namespaces, so it can set up the container's view before your command starts. When your command ends, its exit code travels back to the parent, along the dashed line.
+
+Each line in the picture names the step of this chapter that adds it. Step 1 builds the frame: the parent, the child, a new UTS namespace, the hostname, and running your command. Steps 2, 3 and 4 fill in the rest.
+
 ### Step 1: a new hostname
 
 The smallest container changes one thing: the hostname, the name a computer calls itself.
@@ -143,7 +159,7 @@ The smallest container changes one thing: the hostname, the name a computer call
 
 One warning about the word. Kubernetes also has namespaces, such as `ch02` in chapter 2. Those are folders for Kubernetes objects, and they have nothing to do with Linux namespaces.
 
-Now the trick in the code. The program starts itself twice. The first copy, `run`, asks the kernel to start a second copy, `child`, inside a new namespace. The second copy sets the hostname and then runs your command.
+Now the trick in the code, the two big boxes in the picture. The program starts itself twice. The first copy, `run`, asks the kernel to start a second copy, `child`, inside a new namespace. The second copy sets the hostname and then runs your command.
 
 Why start twice? Because the setup has to happen inside the new namespace, before your command starts. Linux starts a new program in two steps. First `fork` makes a copy of the running process. Then `exec` swaps that copy for the new program. A program written in C, an older language that works close to the kernel, can run its own setup code between those two steps. Go cannot. Every Go program runs the Go runtime, support code that does its work in several threads at once (parallel lines of work inside one process), and a copy made by `fork` can only safely run a few simple steps before `exec`. So instead, the program starts itself again inside the namespace, and does the setup at the start of that second copy.
 
