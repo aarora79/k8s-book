@@ -77,7 +77,7 @@ cd chapters/02-api-server-with-curl
 make proxy
 ```
 
-`cd` moves your terminal into this chapter's folder. `make proxy` runs `kubectl proxy --port=8001`. It keeps running, so leave this window open and come back to your first window. When you finish the chapter, press Ctrl+C here to stop the proxy.
+`cd` moves your terminal into this chapter's folder. `make proxy` runs `kubectl proxy --port=8001`. It keeps running, so leave this window open. Go back to your first window, and move it into this chapter's folder too, with the same `cd` command: every script in this chapter runs from there. When you finish the chapter, press Ctrl+C here to stop the proxy.
 
 Every script first reads [`env.sh`](https://github.com/aarora79/k8s-book/blob/main/chapters/02-api-server-with-curl/env.sh). That file sets two shell variables (named boxes that hold text, read back with a `$` in front, such as `$API`):
 
