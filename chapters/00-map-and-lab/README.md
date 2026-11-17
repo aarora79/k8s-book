@@ -63,6 +63,10 @@ Two pieces of hardware come up often. The CPU (central processing unit) is the c
 
 ## The map
 
+Here is the whole of Kubernetes on one page. Each box is one part, and the note under it names the chapter where you rebuild that part. Do not worry about the names yet. Look at the shape: one box in the middle, the API server, and every other part connected only to it. The rest of this section explains every name on the map, one at a time.
+
+![The map: kubectl sends requests to the API server; the API server alone talks to etcd and calls admission webhooks; controllers, scheduler, kubelet, kube-proxy and gateway all watch the API server.](images/map.svg)
+
 ### The words you need first
 
 Kubernetes has its own words for the things it runs. You need four of them before the map makes sense.
@@ -125,10 +129,6 @@ kube-proxy makes that fixed address work. It watches the API server for Services
 > **Everyday picture.** At a hotel, outside visitors do not wander the halls. They stop at the front desk, say who they came to see, and the desk sends them to the right room.
 >
 > **In Kubernetes,** the gateway is the front desk, the visitors are requests from outside the cluster, and the rooms are your Services.
-
-Here is the whole map. Each box shows the chapter where you rebuild that part.
-
-![The map: kubectl sends requests to the API server; the API server alone talks to etcd and calls admission webhooks; controllers, scheduler, kubelet, kube-proxy and gateway all watch the API server.](images/map.svg)
 
 ### Every part runs the same loop
 
