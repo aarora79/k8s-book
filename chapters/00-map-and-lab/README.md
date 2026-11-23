@@ -192,11 +192,12 @@ brew install go kubectl jq
 
 `brew install` downloads each tool and sets it up so you can run it from the terminal. Homebrew installs the newest Go, and the book needs Go 1.24 or later, so the newest one works.
 
-Next, install kind yourself, at exactly version 0.30.0, so you run the version this book was tested with. Type these four commands one at a time:
+Next, install kind yourself, at exactly version 0.30.0, so you run the version this book was tested with. Type these five commands one at a time:
 
 ```bash
 curl -sSLo kind https://github.com/kubernetes-sigs/kind/releases/download/v0.30.0/kind-darwin-arm64
 chmod +x kind
+sudo mkdir -p /usr/local/bin
 sudo mv kind /usr/local/bin/kind
 kind version
 ```
@@ -205,8 +206,9 @@ Here is what each one does.
 
 1. `curl` downloads kind from its page on GitHub and saves it as a file called `kind`. The flags: `-s` hides curl's progress bar, `-S` still shows errors, `-L` follows the web site if it sends curl on to another address, and `-o kind` names the saved file. In the address, `darwin` means macOS, and `arm64` means Apple's chips.
 2. `chmod +x kind` marks the downloaded file as a program you may run. A file that holds a ready-to-run program is called a binary.
-3. `sudo mv kind /usr/local/bin/kind` moves the file into `/usr/local/bin`, a folder where the terminal looks for programs. `mv` moves a file. `sudo` runs the command as the computer's administrator, because that folder belongs to the administrator; it asks for your password.
-4. `kind version` runs kind for the first time and prints its version. Check that it says `v0.30.0`.
+3. `sudo mkdir -p /usr/local/bin` makes sure the folder `/usr/local/bin` exists, because some Macs with Apple chips do not have it. `mkdir` makes a folder, and `-p` tells it not to complain if the folder is already there. `sudo` runs the command as the computer's administrator, because that part of the disk belongs to the administrator; it asks for your password.
+4. `sudo mv kind /usr/local/bin/kind` moves the file into `/usr/local/bin`, a folder where the terminal looks for programs. `mv` moves a file, and it stops with `No such file or directory` if the folder does not exist.
+5. `kind version` runs kind for the first time and prints its version. Check that it says `v0.30.0`.
 
 Last, install your Docker app, start it, and give it at least 4 CPUs and 8 GB of memory, because all three nodes run inside it. In Docker Desktop, open Settings, then Resources. With Colima, start it with `colima start --cpu 4 --memory 8`. In OrbStack, check its settings for a memory limit.
 
@@ -216,7 +218,7 @@ On Windows, first install WSL2 by following [Microsoft's guide](https://learn.mi
 
 On Linux, install each tool from its own instructions: [Go](https://go.dev/doc/install), [kubectl](https://kubernetes.io/docs/tasks/tools/), [jq](https://jqlang.org/download/), and Docker, either [Docker Engine](https://docs.docker.com/engine/install/) or Docker Desktop. git, curl and make come from your system's package manager, the app store of the terminal: `sudo apt install git curl make` on Ubuntu, for example.
 
-Then install kind with the same four commands as on a Mac, with one change: in the address, replace `kind-darwin-arm64` with the name for your chip. To find your chip, run `uname -m`. If it prints `x86_64`, use `kind-linux-amd64`. If it prints `aarch64`, use `kind-linux-arm64`.
+Then install kind with the same five commands as on a Mac, with one change: in the address, replace `kind-darwin-arm64` with the name for your chip. To find your chip, run `uname -m`. If it prints `x86_64`, use `kind-linux-amd64`. If it prints `aarch64`, use `kind-linux-arm64`.
 
 ### Get the book's code
 
