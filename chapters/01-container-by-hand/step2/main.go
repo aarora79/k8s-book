@@ -46,6 +46,7 @@ func child(rootfs string, args []string) {
 	// like ps read this PID namespace instead of the host's.
 	must(syscall.Chroot(rootfs))
 	must(os.Chdir("/"))
+	must(os.MkdirAll("/proc", 0o755))
 	must(syscall.Mount("proc", "/proc", "proc", 0, ""))
 
 	cmd := exec.Command(args[0], args[1:]...)

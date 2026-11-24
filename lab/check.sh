@@ -7,11 +7,14 @@ CLUSTER="${CLUSTER:-lab}"
 WANT_K8S="v1.34"
 failures=0
 
+# Sets RUNTIME to docker or podman and points kind at the same one.
+. "$(dirname "$0")/runtime.sh"
+
 pass() { printf '  ok    %s\n' "$1"; }
 fail() { printf '  FAIL  %s\n' "$1"; failures=$((failures + 1)); }
 
 echo "Tools"
-for tool in docker kind kubectl go curl jq; do
+for tool in kind kubectl go curl jq; do
   if command -v "$tool" >/dev/null 2>&1; then
     pass "$tool found at $(command -v "$tool")"
   else
@@ -37,15 +40,15 @@ if command -v kind >/dev/null 2>&1; then
   esac
 fi
 
-echo "Docker"
-if docker info >/dev/null 2>&1; then
-  pass "docker daemon is running"
+echo "Container runtime"
+if [ -n "$RUNTIME" ] && "$RUNTIME" info >/dev/null 2>&1; then
+  pass "$RUNTIME is running"
 else
-  fail "docker daemon is not running (start Docker Desktop, OrbStack or Colima)"
+  fail "no running container runtime (install and start Docker or Podman)"
 fi
 
 echo "Cluster"
-if ! kind get clusters 2>/dev/null | grep -qx "$CLUSTER"; then
+if ! cluster_exists "$CLUSTER"; then
   fail "kind cluster '$CLUSTER' does not exist (run make lab)"
 else
   pass "kind cluster '$CLUSTER' exists"
@@ -62,10 +65,10 @@ else
   else
     fail "${ready:-0} of 3 nodes Ready (wait a minute and run make check again)"
   fi
-  if arch=$(docker exec "$CLUSTER-worker" uname -m 2>/dev/null); then
+  if arch=$("$RUNTIME" exec "$CLUSTER-worker" uname -m 2>/dev/null); then
     pass "can run commands inside $CLUSTER-worker (arch $arch)"
   else
-    fail "cannot docker exec into $CLUSTER-worker"
+    fail "cannot $RUNTIME exec into $CLUSTER-worker"
   fi
 fi
 

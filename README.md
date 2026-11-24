@@ -77,7 +77,7 @@ Every chapter has the same sections, in the same order: what you will build, wha
 ## Requirements
 
 - A Mac with an Apple chip (M1 or later), or a Linux computer. A Windows computer works too, through WSL2 (Windows Subsystem for Linux 2, which runs Linux inside Windows).
-- An app that runs Docker containers: Docker Desktop, OrbStack or Colima on a Mac.
+- An app that runs containers: Docker (Docker Desktop, OrbStack or Colima on a Mac) or Podman.
 - These command-line tools: git, Go 1.24 or later, kind 0.30.0, kubectl, curl, jq and make, plus Homebrew to install them on a Mac.
 
 Chapter 0 explains what each of these tools does, walks you through installing them, and checks every version.

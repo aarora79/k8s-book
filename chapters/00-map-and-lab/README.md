@@ -170,8 +170,9 @@ You need eight tools. Here is what each one is for, before you install any of th
 - kubectl is the Kubernetes command-line tool from the map above.
 - curl sends HTTP requests from the terminal. It comes with macOS and with most Linux systems, so you probably have it already.
 - jq reads JSON and picks out the parts you ask for. Chapter 2 uses it a lot.
-- Docker runs containers on your laptop. On a Mac you get it by installing one of three apps: Docker Desktop, OrbStack or Colima. Any one of the three works, and this book calls whichever one you pick "your Docker app".
-- kind builds a Kubernetes cluster out of Docker containers. Its name stands for "Kubernetes in Docker".
+- Docker runs containers on your laptop. On a Mac you get it by installing one of three apps: Docker Desktop, OrbStack or Colima. Any one of the three works.
+- Podman also runs containers, and you can use it instead of Docker. Its commands match the Docker commands this book uses, so if you pick Podman, type `podman` wherever the book types `docker`. This book calls whichever one you pick "your container app". The book's `make` commands find it for you. If both are running they use Docker, and `export CONTAINER_RUNTIME=podman` makes them use Podman.
+- kind builds a Kubernetes cluster out of containers, using Docker or Podman. Its name stands for "Kubernetes in Docker".
 - make runs a named list of commands that a project writes down in a file called a Makefile. When this book says `make lab`, make looks up the entry called `lab` in the Makefile and runs the commands listed there.
 
 > **Everyday picture.** A flight simulator gives a pilot a real cockpit, with real instruments and real controls, bolted to the floor instead of a plane.
@@ -210,13 +211,13 @@ Here is what each one does.
 4. `sudo mv kind /usr/local/bin/kind` moves the file into `/usr/local/bin`, a folder where the terminal looks for programs. `mv` moves a file, and it stops with `No such file or directory` if the folder does not exist.
 5. `kind version` runs kind for the first time and prints its version. Check that it says `v0.30.0`.
 
-Last, install your Docker app, start it, and give it at least 4 CPUs and 8 GB of memory, because all three nodes run inside it. In Docker Desktop, open Settings, then Resources. With Colima, start it with `colima start --cpu 4 --memory 8`. In OrbStack, check its settings for a memory limit.
+Last, install your container app, start it, and give it at least 4 CPUs and 8 GB of memory, because all three nodes run inside it. In Docker Desktop, open Settings, then Resources. With Colima, start it with `colima start --cpu 4 --memory 8`. In OrbStack, check its settings for a memory limit. For Podman, use the [installer from podman.io](https://podman.io/docs/installation), then create and start its virtual machine with `podman machine init --cpus 4 --memory 8192` and `podman machine start`. Podman measures this memory in MiB, so 8192 is 8 GB. The lab was tested on Podman 6.2.0 in its default rootless mode.
 
 ### Install the tools on Linux or Windows
 
 On Windows, first install WSL2 by following [Microsoft's guide](https://learn.microsoft.com/windows/wsl/install), then open the Linux terminal it gives you. From then on, type every command in this book into that Linux terminal, and follow the Linux steps.
 
-On Linux, install each tool from its own instructions: [Go](https://go.dev/doc/install), [kubectl](https://kubernetes.io/docs/tasks/tools/), [jq](https://jqlang.org/download/), and Docker, either [Docker Engine](https://docs.docker.com/engine/install/) or Docker Desktop. git, curl and make come from your system's package manager, the app store of the terminal: `sudo apt install git curl make` on Ubuntu, for example.
+On Linux, install each tool from its own instructions: [Go](https://go.dev/doc/install), [kubectl](https://kubernetes.io/docs/tasks/tools/), [jq](https://jqlang.org/download/), and a container app: [Docker Engine](https://docs.docker.com/engine/install/), Docker Desktop or [Podman](https://podman.io/docs/installation). git, curl and make come from your system's package manager, the app store of the terminal: `sudo apt install git curl make` on Ubuntu, for example.
 
 Then install kind with the same five commands as on a Mac, with one change: in the address, replace `kind-darwin-arm64` with the name for your chip. To find your chip, run `uname -m`. If it prints `x86_64`, use `kind-linux-amd64`. If it prints `aarch64`, use `kind-linux-arm64`.
 
@@ -233,14 +234,14 @@ cd k8s-book
 
 ### Create the cluster
 
-Make sure your Docker app is running, then type:
+Make sure your container app is running, then type:
 
 ```bash
 make lab
 make check
 ```
 
-`make lab` asks kind to build the cluster described in [`lab/kind-config.yaml`](https://github.com/aarora79/k8s-book/blob/main/lab/kind-config.yaml). The first time, this takes a few minutes, because Docker has to download the node image: the packaged copy of every file a node needs, including all of the Kubernetes programs.
+`make lab` asks kind to build the cluster described in [`lab/kind-config.yaml`](https://github.com/aarora79/k8s-book/blob/main/lab/kind-config.yaml). The first time, this takes a few minutes, because your container app has to download the node image: the packaged copy of every file a node needs, including all of the Kubernetes programs.
 
 The file names that node image exactly, by its digest. A digest is a long code worked out from every byte of the image (a byte is the smallest unit of stored data), so any change to the image, however small, gives a different code. Because of the digest, every reader of this book runs exactly the same Kubernetes programs.
 
@@ -263,9 +264,9 @@ Read the columns from left to right. NAME is the node's name. STATUS says whethe
 
 ## Where your code runs
 
-kind runs each node as a Docker container. On a Mac there is one more layer. Containers depend on features of the Linux kernel, and macOS does not have them. So your Docker app runs a small Linux virtual machine: a pretend computer, made in software, running inside your Mac. That makes your nodes Linux containers, inside a Linux virtual machine, inside macOS.
+kind runs each node as a container. On a Mac there is one more layer. Containers depend on features of the Linux kernel, and macOS does not have them. So your container app runs a small Linux virtual machine: a pretend computer, made in software, running inside your Mac. That makes your nodes Linux containers, inside a Linux virtual machine, inside macOS.
 
-You can step inside a node:
+You can step inside a node. If you use Podman, type `podman` in place of `docker` here and in the rest of the book:
 
 ```bash
 docker ps --format '{{.Names}}'

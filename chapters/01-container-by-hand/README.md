@@ -319,6 +319,7 @@ The diff from step 1, in [`step2/main.go`](https://github.com/aarora79/k8s-book/
 	// like ps read this PID namespace instead of the host's.
 	must(syscall.Chroot(rootfs))
 	must(os.Chdir("/"))
+	must(os.MkdirAll("/proc", 0o755))
 	must(syscall.Mount("proc", "/proc", "proc", 0, ""))
 
 	cmd := exec.Command(args[0], args[1:]...)
@@ -334,9 +335,10 @@ The diff from step 1, in [`step2/main.go`](https://github.com/aarora79/k8s-book/
 1. `syscall.CLONE_NEWUTS | syscall.CLONE_NEWPID` asks for two namespaces now, the UTS namespace from step 1 plus a new PID namespace.
 2. `syscall.Chroot(rootfs)` makes the busybox folder the child's `/`. `rootfs` holds the folder you typed after `run`, here `/root/rootfs`. Step 2's `main` takes it from `os.Args[2]` and passes it along.
 3. `os.Chdir("/")` moves the child into its new `/`. Chdir is short for "change directory", the same job as `cd` in the shell. `chroot` changes where paths start, but not the folder the process is standing in, so without this line the child would still be standing in a folder outside its new root.
-4. `syscall.Mount("proc", "/proc", "proc", 0, "")` mounts a fresh `/proc`. Read the five values in order: what to mount (`proc`), where to put it (`/proc`), what kind of filesystem it is (also `proc`), extra settings (`0`, none), and extra options (`""`, none). Because this happens inside the new PID namespace, the new `/proc` lists only the child's processes.
-5. `err := cmd.Run()` runs your command, and keeps the result in `err` instead of exiting right away.
-6. `syscall.Unmount("/proc", 0)` takes the `/proc` mount away again, then `exitWith(err)` ends the program. Remember these two lines: step 3 shows why they are not enough.
+4. `os.MkdirAll("/proc", 0o755)` makes sure the folder `/proc` exists, because a mount needs a folder to attach to and Podman's busybox export leaves this one out. Step 3 explains the `0o755`.
+5. `syscall.Mount("proc", "/proc", "proc", 0, "")` mounts a fresh `/proc`. Read the five values in order: what to mount (`proc`), where to put it (`/proc`), what kind of filesystem it is (also `proc`), extra settings (`0`, none), and extra options (`""`, none). Because this happens inside the new PID namespace, the new `/proc` lists only the child's processes.
+6. `err := cmd.Run()` runs your command, and keeps the result in `err` instead of exiting right away.
+7. `syscall.Unmount("/proc", 0)` takes the `/proc` mount away again, then `exitWith(err)` ends the program. Remember these two lines: step 3 shows why they are not enough.
 
 Now run it. The `sh -c '...'` part asks busybox's shell to run three commands: print its own pid (`$$`), list the processes, and list the files in `/`:
 
@@ -380,40 +382,44 @@ From [`step3/main.go`](https://github.com/aarora79/k8s-book/blob/main/chapters/0
 	// Mark every mount private so the /proc we mount below stays in here.
 	must(syscall.Mount("", "/", "", syscall.MS_PRIVATE|syscall.MS_REC, ""))
 
+	// New: a /dev of the container's own, also private to this namespace. It
+	// comes before chroot because it borrows device files from the node's /dev.
+	must(mountDev(rootfs))
+
 	must(syscall.Chroot(rootfs))
 	must(os.Chdir("/"))
+	must(os.MkdirAll("/proc", 0o755))
 	must(syscall.Mount("proc", "/proc", "proc", 0, ""))
-	// New: a /dev of the container's own, also private to this namespace.
-	must(mountDev())
 ```
 
 **Code walkthrough.** In [`step3/main.go`](https://github.com/aarora79/k8s-book/blob/main/chapters/01-container-by-hand/step3/main.go):
 
 1. `syscall.CLONE_NEWNS` adds a mount namespace. (NS stands for "namespace". Mount namespaces were the first kind Linux had, so they got the plain name.)
 2. `syscall.Mount("", "/", "", syscall.MS_PRIVATE|syscall.MS_REC, "")` changes a setting on mounts that already exist, instead of making a new one. `MS_PRIVATE` marks a mount private, and `MS_REC` means "and every mount below it too". Together they make every mount the child can see private.
-3. The `chroot`, `chdir` and `/proc` lines are the same as step 2.
-4. `mountDev()` is new, and the next listing shows it.
+3. `mountDev(rootfs)` is new, and the next listing shows it. It runs before `chroot`, because after `chroot` the child can no longer reach the node's `/dev`.
+4. The `chroot`, `chdir` and `/proc` lines are the same as step 2.
 
 The `Unmount` at the end is gone. When the last process in the namespace exits, the kernel throws away the namespace, and its mounts go with it.
 
 Programs also expect a few special files in `/dev`, called device files. Reading or writing a device file talks to a driver, a piece of kernel code that runs one kind of device. Some devices are real hardware, but these four are made up by the kernel: `/dev/null` throws away anything written to it, `/dev/zero` gives back endless zero bytes, and `/dev/random` and `/dev/urandom` give back random bytes.
 
-The busybox folder has an empty `/dev`. So `mountDev` mounts a `tmpfs` there (a small filesystem that lives in memory) and creates the four device files in it. The kernel names each device with two numbers. The first, the major number, picks the driver; major 1 is the driver for memory devices. The second, the minor number, picks the device; on every Linux system, major 1 with minor 3 is `/dev/null`:
+The busybox folder has an empty `/dev`. So `mountDev` mounts a `tmpfs` there (a small filesystem that lives in memory) and fills it with the node's four device files. The usual way to make a device file is the `mknod` system call, but a node on rootless Podman is not allowed to use it. So the code uses a bind mount, which makes something that already exists appear at a second place. Each device file in the container is the node's own device file, seen through a second path:
 
 ```go
-func mountDev() error {
-	if err := os.MkdirAll("/dev", 0o755); err != nil {
+func mountDev(rootfs string) error {
+	dev := filepath.Join(rootfs, "dev")
+	if err := os.MkdirAll(dev, 0o755); err != nil {
 		return err
 	}
-	if err := syscall.Mount("tmpfs", "/dev", "tmpfs", syscall.MS_NOSUID, "mode=755"); err != nil {
+	if err := syscall.Mount("tmpfs", dev, "tmpfs", syscall.MS_NOSUID, "mode=755"); err != nil {
 		return err
 	}
-	for name, minor := range map[string]int{"null": 3, "zero": 5, "random": 8, "urandom": 9} {
-		dev := 1<<8 | minor // major 1, the "memory devices" driver
-		if err := syscall.Mknod("/dev/"+name, syscall.S_IFCHR|0o666, dev); err != nil {
+	for _, name := range []string{"null", "zero", "random", "urandom"} {
+		target := filepath.Join(dev, name)
+		if err := os.WriteFile(target, nil, 0o666); err != nil { // the mount point
 			return err
 		}
-		if err := os.Chmod("/dev/"+name, 0o666); err != nil { // undo the umask
+		if err := syscall.Mount("/dev/"+name, target, "", syscall.MS_BIND, ""); err != nil {
 			return err
 		}
 	}
@@ -423,13 +429,13 @@ func mountDev() error {
 
 **Code walkthrough.** `mountDev` in [`step3/main.go`](https://github.com/aarora79/k8s-book/blob/main/chapters/01-container-by-hand/step3/main.go):
 
-1. `if err := os.MkdirAll("/dev", 0o755); err != nil { return err }` makes sure the folder `/dev` exists, and if that fails, hands the error back to the caller, where `must` reports it. Every step in this function follows the same pattern.
-2. `0o755` is a set of file permissions, written as three digits in base 8. The digits are for the file's owner, for its group (a set of users), and for everyone else. Each digit adds up 4 for read, 2 for write and 1 for run (or, for a folder, enter). So 7 is all three, and 5 is read and enter. The owner may do everything, and everyone else may read and enter.
-3. `syscall.Mount("tmpfs", "/dev", "tmpfs", syscall.MS_NOSUID, "mode=755")` mounts an empty in-memory filesystem on `/dev`. `MS_NOSUID` is a safety setting: it stops any program on this filesystem from gaining extra powers when it starts.
-4. `map[string]int{"null": 3, ...}` is a lookup table, called a map, from a device name to its minor number. `for name, minor := range ...` goes through the table one pair at a time.
-5. `1<<8 | minor` packs the major and minor numbers into one number, the way the kernel expects. In binary (base 2), moving a number 8 places to the left multiplies it by 256, so `1<<8` is 256, and `| minor` puts the minor number in the lower places. For `null` that gives 256 plus 3, which is 259.
-6. `syscall.Mknod("/dev/"+name, ...)` creates the device file. `"/dev/"+name` joins two pieces of text, giving `/dev/null` and so on. `S_IFCHR` says it is a character device, one that reads and writes a stream of bytes, and `0o666` lets everyone read and write it.
-7. `os.Chmod(..., 0o666)` sets the permissions again. When Linux creates a file, it quietly removes some permissions, following a setting called the umask, and this line puts them back.
+1. `filepath.Join(rootfs, "dev")` builds the path of the container's `/dev`, here `/root/rootfs/dev`.
+2. `if err := os.MkdirAll(dev, 0o755); err != nil { return err }` makes sure that folder exists, and if that fails, hands the error back to the caller, where `must` reports it. Every step in this function follows the same pattern.
+3. `0o755` is a set of file permissions, written as three digits in base 8. The digits are for the file's owner, for its group (a set of users), and for everyone else. Each digit adds up 4 for read, 2 for write and 1 for run (or, for a folder, enter). So 7 is all three, and 5 is read and enter. The owner may do everything, and everyone else may read and enter.
+4. `syscall.Mount("tmpfs", dev, "tmpfs", syscall.MS_NOSUID, "mode=755")` mounts an empty in-memory filesystem on that folder. `MS_NOSUID` is a safety setting: it stops any program on this filesystem from gaining extra powers when it starts.
+5. `[]string{"null", "zero", "random", "urandom"}` is a list of the four device names. `for _, name := range ...` goes through the list one name at a time, and `_` throws away each name's position, which the code does not need.
+6. `os.WriteFile(target, nil, 0o666)` creates an empty ordinary file. A bind mount needs something to attach to, and this file is it.
+7. `syscall.Mount("/dev/"+name, target, "", syscall.MS_BIND, "")` attaches the node's device file on top of that empty file. `"/dev/"+name` joins two pieces of text, giving `/dev/null` and so on. `MS_BIND` asks for a bind mount. From now on, opening the file in the container opens the real device.
 8. `return nil` at the end means "no error".
 
 ### Step 4: limits
@@ -585,7 +591,7 @@ Open the node's shell again with `make shell` for these.
 
 **Why cgroup version 2 puts everything in one folder.** Each kind of limit is run by a part of the kernel called a controller. In version 1, each controller had its own folder tree. A process could sit in one place in the memory tree and somewhere else in the process tree, and tools had to keep the trees matched by hand. Version 2 has one tree for every controller. That is why the version 2 code in `newCgroup` is shorter than the version 1 code.
 
-**What this does not protect.** Your container runs as the node's real root user, with all of root's powers, and the kernel answers every request it makes. That matters, because the kernel is shared: every node in your lab, and Docker itself, run on the same kernel inside your Docker app's virtual machine. A process inside your container could load new code into that kernel, or change kernel settings for everything running on it. runc blocks this in three ways. User namespaces make root inside the container an ordinary user outside it. Dropping capabilities takes away root's special powers one by one. seccomp filters the system calls a process may make.
+**What this does not protect.** Your container runs as the node's real root user, with all of root's powers, and the kernel answers every request it makes. That matters, because the kernel is shared: every node in your lab, and your container app itself, run on the same kernel inside its virtual machine. A process inside your container could load new code into that kernel, or change kernel settings for everything running on it. (On rootless Podman, the node's root is an ordinary user of the virtual machine, which limits this damage. Your runtime does nothing to help.) runc blocks this in three ways. User namespaces make root inside the container an ordinary user outside it. Dropping capabilities takes away root's special powers one by one. seccomp filters the system calls a process may make.
 
 ## Improving and expanding
 

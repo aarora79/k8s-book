@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"syscall"
 )
 
@@ -46,11 +47,14 @@ func child(rootfs string, args []string) {
 	// Mark every mount private so the /proc we mount below stays in here.
 	must(syscall.Mount("", "/", "", syscall.MS_PRIVATE|syscall.MS_REC, ""))
 
+	// New: a /dev of the container's own, also private to this namespace. It
+	// comes before chroot because it borrows device files from the node's /dev.
+	must(mountDev(rootfs))
+
 	must(syscall.Chroot(rootfs))
 	must(os.Chdir("/"))
+	must(os.MkdirAll("/proc", 0o755))
 	must(syscall.Mount("proc", "/proc", "proc", 0, ""))
-	// New: a /dev of the container's own, also private to this namespace.
-	must(mountDev())
 
 	cmd := exec.Command(args[0], args[1:]...)
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
@@ -60,21 +64,22 @@ func child(rootfs string, args []string) {
 }
 
 // mountDev gives the container a private /dev holding the few device files
-// most programs expect. The kernel knows each device by a major and minor
-// number; 1,3 is /dev/null on every Linux system.
-func mountDev() error {
-	if err := os.MkdirAll("/dev", 0o755); err != nil {
+// most programs expect. It bind mounts each one from the node, because a
+// rootless node may not create device files with mknod.
+func mountDev(rootfs string) error {
+	dev := filepath.Join(rootfs, "dev")
+	if err := os.MkdirAll(dev, 0o755); err != nil {
 		return err
 	}
-	if err := syscall.Mount("tmpfs", "/dev", "tmpfs", syscall.MS_NOSUID, "mode=755"); err != nil {
+	if err := syscall.Mount("tmpfs", dev, "tmpfs", syscall.MS_NOSUID, "mode=755"); err != nil {
 		return err
 	}
-	for name, minor := range map[string]int{"null": 3, "zero": 5, "random": 8, "urandom": 9} {
-		dev := 1<<8 | minor // major 1, the "memory devices" driver
-		if err := syscall.Mknod("/dev/"+name, syscall.S_IFCHR|0o666, dev); err != nil {
+	for _, name := range []string{"null", "zero", "random", "urandom"} {
+		target := filepath.Join(dev, name)
+		if err := os.WriteFile(target, nil, 0o666); err != nil { // the mount point
 			return err
 		}
-		if err := os.Chmod("/dev/"+name, 0o666); err != nil { // undo the umask
+		if err := syscall.Mount("/dev/"+name, target, "", syscall.MS_BIND, ""); err != nil {
 			return err
 		}
 	}

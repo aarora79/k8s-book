@@ -159,6 +159,7 @@ Every term the book defines, in alphabetical order. Each entry gives the meaning
 - **Pipe**: the `|` sign in the shell, which sends the output of one command into the next. Everyday picture: a factory line. [Chapter 2](chapters/02-api-server-with-curl/README.md)
 - **pivot_root**: a stronger version of `chroot` that swaps the root for a whole mount namespace, so the old root can be removed. runc uses it. [Chapter 1](chapters/01-container-by-hand/README.md)
 - **Pod**: the smallest thing Kubernetes runs: one or more containers that share a node, a network address and storage. [Chapter 0](chapters/00-map-and-lab/README.md)
+- **Podman**: a tool that runs containers, with commands that match Docker's. kind can use it in place of Docker. [Chapter 0](chapters/00-map-and-lab/README.md)
 - **Port**: a number that names one program on a computer, such as `8001`. Everyday picture: an apartment number. [Chapter 0](chapters/00-map-and-lab/README.md)
 - **Private and shared mounts**: a shared mount copies each new mount into other mount namespaces too (mount propagation); a private mount does not. systemd makes mounts shared, so a container runtime marks them private. [Chapter 1](chapters/01-container-by-hand/README.md)
 - **/proc**: a special folder that the Linux kernel fills in as you read it, with facts about every process. [Chapter 1](chapters/01-container-by-hand/README.md)
