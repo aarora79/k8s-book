@@ -6,6 +6,9 @@
 // opens GitHub in a new tab.
 
 var REPO_PREFIX = "https://github.com/aarora79/k8s-book/blob/main/";
+// Remembers that the reader closed the panel, so it stays closed on the next
+// page. _layouts/book.html reads the same key before the page draws.
+var CLOSED_KEY = "codePanelClosed";
 var COPIED_RESET_MS = 2000;
 
 var panelBody = document.getElementById("code-panel-body");
@@ -16,6 +19,19 @@ var closeButton = document.getElementById("code-panel-close");
 var emptyMessage = panelBody.innerHTML;
 var currentText = "";
 var currentLink = null;
+
+
+function rememberClosed(closed) {
+  try {
+    if (closed) {
+      localStorage.setItem(CLOSED_KEY, "1");
+    } else {
+      localStorage.removeItem(CLOSED_KEY);
+    }
+  } catch (e) {
+    // Storage can be turned off; the panel still works for this page.
+  }
+}
 
 
 function showMessage(text) {
@@ -58,6 +74,8 @@ function openFile(link) {
   githubLink.href = link.href;
   githubLink.hidden = false;
   copyButton.hidden = true;
+  document.body.classList.remove("code-panel-closed");
+  rememberClosed(false);
   document.body.classList.add("code-panel-open");
   showMessage("Loading " + path + " ...");
 
@@ -81,6 +99,8 @@ function openFile(link) {
 
 function closePanel() {
   document.body.classList.remove("code-panel-open");
+  document.body.classList.add("code-panel-closed");
+  rememberClosed(true);
   if (currentLink !== null) {
     currentLink.classList.remove("code-link-active");
     currentLink = null;

@@ -2,6 +2,10 @@
 <html lang="en">
 {%- include head.html -%}
 <body data-baseurl="{{ site.baseurl }}">
+  <script>
+    // Keep the code panel closed if the reader closed it on an earlier page.
+    try { if (localStorage.getItem("codePanelClosed") === "1") { document.body.classList.add("code-panel-closed"); } } catch (e) {}
+  </script>
   {%- include book-order.html -%}
   {%- include sidebar.html -%}
   {%- include code-panel.html -%}

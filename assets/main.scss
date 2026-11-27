@@ -587,6 +587,16 @@ a.code-link-active code {
   outline: 2px solid $yellow;
 }
 
+// After a reader closes the panel, the text takes the whole width. Clicking a
+// code link opens the panel again.
+.code-panel-closed .book-main {
+  margin-right: 0;
+}
+
+.code-panel-closed .code-panel {
+  display: none;
+}
+
 // Below 1200px there is no room for three columns. The panel stays hidden
 // and slides in over the page when a reader opens a file.
 @media (max-width: 1200px) {

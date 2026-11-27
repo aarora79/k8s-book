@@ -1,0 +1,117 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 680" width="960" height="680" role="img" aria-labelledby="title desc">
+  <title id="title">What runs where, and what is only a record</title>
+  <desc id="desc">The lab cluster has three nodes. lab-control-plane runs kube-apiserver, etcd, kube-scheduler and kube-controller-manager, which holds the Deployment controller, the ReplicaSet controller, the node lifecycle controller and dozens more. lab-worker runs two web pods and lab-worker2 runs the third; the gateway from chapter 10 and the admission webhook from chapter 9 will also run as pods on worker nodes. Every node runs a kubelet, kube-proxy and containerd. Below the nodes, a separate panel shows the objects, which are records in etcd and do not run: the Deployment web owns the ReplicaSet web-5f6b554666, which owns three Pods, and the Service web selects those Pods.</desc>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#52615f"/></marker>
+  </defs>
+  <style>
+    text { font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; fill: #1d2b2a; font-size: 13px; }
+    .node { font-size: 17px; font-weight: 700; }
+    .name { font-size: 14px; font-weight: 600; }
+    .sub { font-size: 12px; fill: #52615f; }
+    .note { font-size: 13px; fill: #2b3a39; font-style: italic; }
+    .frame { fill: none; stroke: #9aa6a4; stroke-width: 1.5; stroke-dasharray: 6 4; }
+    .nodebox { fill: #f3f6f5; stroke: #52615f; stroke-width: 1.5; }
+    .box { fill: #fffdf5; stroke: #52615f; stroke-width: 1.5; }
+    .hub { fill: #e0f2ef; stroke: #0f766e; stroke-width: 2; }
+    .ctl { fill: #ffffff; stroke: #0f766e; stroke-width: 1.2; }
+    .agent { fill: #e8ecf7; stroke: #4a5a8a; stroke-width: 1.5; }
+    .later { fill: #ffffff; stroke: #52615f; stroke-width: 1.5; stroke-dasharray: 6 4; }
+    .objpanel { fill: #fff8e1; stroke: #c9a227; stroke-width: 1.5; }
+    .obj { fill: #ffffff; stroke: #c9a227; stroke-width: 1.5; }
+    .line { stroke: #52615f; stroke-width: 1.5; fill: none; }
+  </style>
+  <rect width="960" height="680" fill="#ffffff"/>
+
+  <text class="name" x="20" y="26">The kind cluster "lab": each node is a container in your container app</text>
+  <rect class="frame" x="10" y="38" width="940" height="402" rx="10"/>
+
+  <!-- control-plane node -->
+  <rect class="nodebox" x="25" y="55" width="420" height="370" rx="8"/>
+  <text class="node" x="40" y="80">lab-control-plane</text>
+  <text class="sub" x="40" y="98">the control plane; the scheduler keeps your pods off this node</text>
+
+  <rect class="hub" x="40" y="112" width="190" height="48" rx="6"/>
+  <text class="name" x="135" y="141" text-anchor="middle">kube-apiserver</text>
+  <rect class="box" x="245" y="112" width="185" height="48" rx="6"/>
+  <text class="name" x="337" y="134" text-anchor="middle">etcd</text>
+  <text class="sub" x="337" y="151" text-anchor="middle">holds every object</text>
+
+  <rect class="box" x="40" y="172" width="390" height="128" rx="6"/>
+  <text class="name" x="55" y="194">kube-controller-manager</text>
+  <text class="sub" x="230" y="194">one program, many controllers</text>
+  <rect class="ctl" x="55" y="206" width="175" height="34" rx="5"/>
+  <text x="142" y="228" text-anchor="middle">Deployment controller</text>
+  <rect class="ctl" x="240" y="206" width="175" height="34" rx="5"/>
+  <text x="327" y="228" text-anchor="middle">ReplicaSet controller</text>
+  <rect class="ctl" x="55" y="250" width="175" height="34" rx="5"/>
+  <text x="142" y="272" text-anchor="middle">node lifecycle controller</text>
+  <text class="note" x="327" y="272" text-anchor="middle">and dozens more</text>
+
+  <rect class="box" x="40" y="312" width="390" height="40" rx="6"/>
+  <text class="name" x="235" y="337" text-anchor="middle">kube-scheduler</text>
+
+  <rect class="agent" x="40" y="366" width="390" height="44" rx="6"/>
+  <text class="name" x="235" y="393" text-anchor="middle">kubelet · kube-proxy · containerd</text>
+
+  <!-- lab-worker -->
+  <rect class="nodebox" x="460" y="55" width="230" height="370" rx="8"/>
+  <text class="node" x="475" y="80">lab-worker</text>
+  <text class="sub" x="475" y="98">a worker node: runs your pods</text>
+  <rect class="box" x="475" y="112" width="200" height="40" rx="6"/>
+  <text x="575" y="137" text-anchor="middle">pod web-5f6b554666-rpxgw</text>
+  <rect class="box" x="475" y="162" width="200" height="40" rx="6"/>
+  <text x="575" y="187" text-anchor="middle">pod web-5f6b554666-mcknj</text>
+  <rect class="later" x="475" y="236" width="200" height="40" rx="6"/>
+  <text x="575" y="261" text-anchor="middle">gateway pod (ch 10)</text>
+  <rect class="agent" x="475" y="366" width="200" height="44" rx="6"/>
+  <text class="name" x="575" y="385" text-anchor="middle">kubelet · kube-proxy</text>
+  <text class="name" x="575" y="402" text-anchor="middle">containerd</text>
+
+  <!-- lab-worker2 -->
+  <rect class="nodebox" x="705" y="55" width="230" height="370" rx="8"/>
+  <text class="node" x="720" y="80">lab-worker2</text>
+  <text class="sub" x="720" y="98">a worker node: runs your pods</text>
+  <rect class="box" x="720" y="112" width="200" height="40" rx="6"/>
+  <text x="820" y="137" text-anchor="middle">pod web-5f6b554666-7bgr8</text>
+  <rect class="later" x="720" y="236" width="200" height="40" rx="6"/>
+  <text x="820" y="261" text-anchor="middle">admission webhook pod (ch 9)</text>
+  <rect class="agent" x="720" y="366" width="200" height="44" rx="6"/>
+  <text class="name" x="820" y="385" text-anchor="middle">kubelet · kube-proxy</text>
+  <text class="name" x="820" y="402" text-anchor="middle">containerd</text>
+
+  <!-- objects -->
+  <rect class="objpanel" x="10" y="460" width="940" height="160" rx="10"/>
+  <text class="name" x="25" y="484">Objects: records the API server keeps in etcd. They describe what should run; they do not run.</text>
+
+  <rect class="obj" x="30" y="505" width="170" height="44" rx="6"/>
+  <text class="name" x="115" y="532" text-anchor="middle">Deployment web</text>
+  <text class="sub" x="115" y="567" text-anchor="middle">made by you</text>
+  <line class="line" x1="200" y1="527" x2="253" y2="527" marker-end="url(#a)"/>
+  <text class="sub" x="226" y="519" text-anchor="middle">owns</text>
+
+  <rect class="obj" x="255" y="505" width="240" height="44" rx="6"/>
+  <text class="name" x="375" y="532" text-anchor="middle">ReplicaSet web-5f6b554666</text>
+  <text class="sub" x="375" y="567" text-anchor="middle">made by the Deployment controller</text>
+  <line class="line" x1="495" y1="527" x2="548" y2="527" marker-end="url(#a)"/>
+  <text class="sub" x="521" y="519" text-anchor="middle">owns</text>
+
+  <rect class="obj" x="550" y="505" width="160" height="44" rx="6"/>
+  <text class="name" x="630" y="532" text-anchor="middle">3 Pods</text>
+  <text class="sub" x="630" y="567" text-anchor="middle">made by the ReplicaSet controller;</text>
+  <text class="sub" x="630" y="583" text-anchor="middle">the scheduler adds the node</text>
+
+  <rect class="obj" x="765" y="505" width="165" height="44" rx="6"/>
+  <text class="name" x="847" y="532" text-anchor="middle">Service web</text>
+  <text class="sub" x="847" y="567" text-anchor="middle">made by you</text>
+  <line class="line" x1="765" y1="527" x2="712" y2="527" marker-end="url(#a)"/>
+  <text class="sub" x="738" y="519" text-anchor="middle">selects</text>
+
+  <!-- key -->
+  <rect class="agent" x="20" y="642" width="22" height="16" rx="3"/>
+  <text class="note" x="50" y="655">on every node</text>
+  <rect class="later" x="170" y="642" width="22" height="16" rx="3"/>
+  <text class="note" x="200" y="655">added in a later chapter, placed by the scheduler like any pod</text>
+  <rect class="obj" x="600" y="642" width="22" height="16" rx="3"/>
+  <text class="note" x="630" y="655">a record in etcd, not a program</text>
+</svg>
